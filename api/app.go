@@ -14,9 +14,12 @@ func main() {
 	app := fiber.New()
 	app.Use(logger.New())
 
-	router := app.Group("/api")
+	api := app.Group("/api")
 
-	router.Get("/users", routes.GetUsers)
+	routes.UserRoutes(api)
+	//routes.UserRoutes(router)
+	//routes.UserRoutes(router)
+	//routes.UserRoutes(router)
 
 	log.Fatal(app.Listen(":8080"))
 }
