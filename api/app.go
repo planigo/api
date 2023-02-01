@@ -1,18 +1,20 @@
 package api
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/joho/godotenv"
 	"log"
 	"planigo/api/routes"
 	"planigo/config/database"
 	"planigo/config/mail"
 	storeManager "planigo/config/store"
 	"planigo/pkg/auth"
+	"planigo/pkg/shop"
 	"planigo/pkg/user"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/joho/godotenv"
 )
 
 func Start() {
@@ -43,9 +45,11 @@ func Start() {
 	// User routes
 	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session}
 	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session}
+	shopHandler := &shop.ShopHandler{Store: store}
 
 	routes.UserRoutes(api, userHandler)
 	routes.AuthRoutes(api, authHandler)
+	routes.ShopRoutes(api, shopHandler)
 
 	log.Fatal(app.Listen(":8080"))
 }
