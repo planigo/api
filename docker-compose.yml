@@ -7,7 +7,30 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
+      MARIADB_ROOT_USERNAME: ${MARIADB_ROOT_USERNAME:-root}
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-password}
       MARIADB_DATABASE: ${MARIADB_DATABASE:-planigo}
+      MARIADB_HOST: ${MARIADB_HOST:-database}
+      MARIADB_PORT: ${MARIADB_PORT:-3306}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MARIADB_ROOT_PASSWORD" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+#  api:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: on-failure
+#    environment:
+#      MARIADB_ROOT_USERNAME: ${MARIADB_ROOT_USERNAME:-root}
+#      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-password}
+#      MARIADB_DATABASE: ${MARIADB_DATABASE:-planigo}
+#    ports:
+#      - "1564:1564"
+#    depends_on:
+#      database:
+#        condition: service_healthy
