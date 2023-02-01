@@ -4,17 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 )
 
 func Connect() (*sql.DB, error) {
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	config := mysql.Config{
 		User:                 os.Getenv("MARIADB_ROOT_USERNAME"),
 		Passwd:               os.Getenv("MARIADB_ROOT_PASSWORD"),

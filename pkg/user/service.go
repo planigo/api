@@ -1,20 +1,21 @@
 package user
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"planigo/config/mail"
 	"planigo/config/store"
 	"planigo/pkg/entities"
 )
 
 type Handler struct {
 	*store.Store
+	*mail.Mailer
 }
 
-func NewHandler(store *store.Store) *Handler {
-	return &Handler{store}
+func NewHandler(store *store.Store, mailer *mail.Mailer) *Handler {
+	return &Handler{store, mailer}
 }
 
 func (r Handler) FindUsers() fiber.Handler {
@@ -23,8 +24,6 @@ func (r Handler) FindUsers() fiber.Handler {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Println(users)
 
 		return ctx.JSON(users)
 	}
@@ -49,6 +48,8 @@ func (r Handler) RegisterUser() fiber.Handler {
 			log.Fatal(err)
 		}
 
+		sendValidationEmail(r.Mailer, *userPayload)
+
 		return ctx.JSON(userPayload)
 	}
 }
@@ -61,4 +62,14 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func sendValidationEmail(mailer *mail.Mailer, user entities.User) {
+	emailContent := mail.Content{
+		To:      user.Email,
+		Subject: "Bienvenue sur Planigo",
+		Body:    "Veuillez valider votre compte sur ce lien pour pouvoir effectuer votre premier rendez-vous: http://planigo.fr/",
+	}
+
+	mailer.Send(emailContent)
 }

@@ -5,7 +5,8 @@ CREATE TABLE `User`
     `firstname` VARCHAR(255)            NOT NULL,
     `lastname`  VARCHAR(255)            NOT NULL,
     `role`      ENUM ('admin', 'owner', 'customer') DEFAULT 'customer',
-    `password`  TEXT                    NOT NULL
+    `password`  TEXT                    NOT NULL,
+    `is_email_verified` BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE `Store`
