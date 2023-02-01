@@ -6,20 +6,26 @@ import (
 	"log"
 	"planigo/api/routes"
 	"planigo/config/database"
+	store2 "planigo/config/store"
+	"planigo/pkg/user"
 )
 
 func main() {
-	database.Connect()
+	db, err := database.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
 
 	app := fiber.New()
 	app.Use(logger.New())
-
 	api := app.Group("/api")
 
-	routes.UserRoutes(api)
-	//routes.UserRoutes(router)
-	//routes.UserRoutes(router)
-	//routes.UserRoutes(router)
+	store := store2.NewStore(db)
+	handler := &user.Handler{Store: store}
+
+	routes.UserRoutes(api, handler)
 
 	log.Fatal(app.Listen(":8080"))
 }

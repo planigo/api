@@ -9,11 +9,8 @@ import (
 	"os"
 )
 
-// DB is the underlying database connection
-var DB *sql.DB
+func Connect() (*sql.DB, error) {
 
-// Connect initiate the database connection and migrate all the tables
-func Connect() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -32,13 +29,11 @@ func Connect() {
 		log.Fatal(err)
 	}
 
-	defer db.Close()
 	if err = db.Ping(); err != nil {
 		fmt.Println("[DATABASE]::CONNECTION_ERROR")
 		panic(err)
 	}
 
-	DB = db
-
 	fmt.Println("[DATABASE]::CONNECTED")
+	return db, nil
 }
