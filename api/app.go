@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"planigo/api/routes"
 	"planigo/config/database"
@@ -28,11 +29,15 @@ func Start() {
 
 	defer db.Close()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		AppName: "Planigo",
+	})
 
-	session := session.New(session.Config{Expiration: 48 * time.Hour})
-	mailer := mail.New()
+	sessionConfig := session.Config{Expiration: 48 * time.Hour}
+
 	store := storeManager.NewStore(db)
+	mailer := mail.New()
+	session := session.New(sessionConfig)
 
 	// Middlewares
 	app.Use(logger.New())
@@ -48,6 +53,13 @@ func Start() {
 	routes.UserRoutes(api, userHandler)
 	routes.AuthRoutes(api, authHandler)
 	routes.ShopRoutes(api, shopHandler)
+
+	// Endpoint for 'Not Found'.
+	app.All("*", func(c *fiber.Ctx) error {
+		errorMessage := fmt.Sprintf("Route '%s' does not exist in this API!", c.OriginalURL())
+
+		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{"status": "fail", "message": errorMessage})
+	})
 
 	log.Fatal(app.Listen(":8080"))
 }
