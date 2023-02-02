@@ -47,7 +47,7 @@ func Start() {
 	// Controllers
 	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session}
 	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session}
-	shopHandler := &shop.ShopHandler{Store: store}
+	shopHandler := &shop.Handler{Store: store, Session: session}
 
 	// Routers
 	routes.UserRoutes(api, userHandler)

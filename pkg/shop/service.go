@@ -1,6 +1,7 @@
 package shop
 
 import (
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"planigo/config/store"
 	"planigo/pkg/entities"
@@ -8,17 +9,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type ShopHandler struct {
+type Handler struct {
 	*store.Store
+	Session *session.Store
 }
 
-func NewHandler(store *store.Store) *ShopHandler {
-	return &ShopHandler{store}
+func New(store *store.Store, session *session.Store) *Handler {
+	return &Handler{store, session}
 }
 
-func (sh ShopHandler) GetShops() fiber.Handler {
+func (h Handler) GetShops() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		shops, err := sh.ShopStore.FindShops()
+		shops, err := h.ShopStore.FindShops()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -27,11 +29,11 @@ func (sh ShopHandler) GetShops() fiber.Handler {
 	}
 }
 
-func (sh ShopHandler) GetShopById() fiber.Handler {
+func (h Handler) GetShopById() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shopId := ctx.Params("shopId")
 
-		shop, err := sh.ShopStore.FindShopById(shopId)
+		shop, err := h.ShopStore.FindShopById(shopId)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -40,14 +42,14 @@ func (sh ShopHandler) GetShopById() fiber.Handler {
 	}
 }
 
-func (sh ShopHandler) CreateShop() fiber.Handler {
+func (h Handler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		newShop := new(entities.ShopRequest)
 		if err := ctx.BodyParser(newShop); err != nil {
 			return err
 		}
 
-		shop, err := sh.ShopStore.AddShop(*newShop)
+		shop, err := h.ShopStore.AddShop(*newShop)
 
 		if err != nil {
 			log.Fatal(err)
@@ -57,7 +59,7 @@ func (sh ShopHandler) CreateShop() fiber.Handler {
 	}
 }
 
-func (sh ShopHandler) EditShop() fiber.Handler {
+func (h Handler) EditShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shopEdited := new(entities.ShopRequest)
 		shopId := ctx.Params("shopId")
@@ -66,12 +68,12 @@ func (sh ShopHandler) EditShop() fiber.Handler {
 			return err
 		}
 
-		shopId, err := sh.ShopStore.UpdateShop(shopId, *shopEdited)
+		shopId, err := h.ShopStore.UpdateShop(shopId, *shopEdited)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		shop, err := sh.ShopStore.FindShopById(shopId)
+		shop, err := h.ShopStore.FindShopById(shopId)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -80,11 +82,11 @@ func (sh ShopHandler) EditShop() fiber.Handler {
 	}
 }
 
-func (sh ShopHandler) DeleteShop() fiber.Handler {
+func (h Handler) DeleteShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shopId := ctx.Params("shopId")
 
-		code, err := sh.ShopStore.RemoveShop(shopId)
+		code, err := h.ShopStore.RemoveShop(shopId)
 		if err != nil {
 			log.Fatal(code, err)
 		}
