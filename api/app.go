@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -15,8 +15,7 @@ import (
 	"time"
 )
 
-func main() {
-
+func Start() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
