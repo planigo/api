@@ -6,6 +6,6 @@ type User struct {
 	Firstname       string `json:"firstname"`
 	Lastname        string `json:"lastname"`
 	Role            string `json:"role"`
-	Password        string `json:"password"`
+	Password        string `json:"password,omitempty"`
 	IsEmailVerified bool   `json:"isEmailVerified"`
 }
