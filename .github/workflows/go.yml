@@ -23,7 +23,7 @@ jobs:
           run: go test -v
 
     build:
-        depends-on: test
+        needs: test
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v2
