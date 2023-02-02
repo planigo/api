@@ -8,7 +8,16 @@ on:
 
 jobs:
 
-    build:
+    lint:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3.4.0
+
+
+    test:
+        needs: lint
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v2
@@ -19,7 +28,18 @@ jobs:
               cache: true
         - name: Install dependencies
           run: go get .
-        - name: Build
-          run: go build -v
         - name: Test
           run: go test -v
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        - name: Set up Go 1.19
+          uses: actions/setup-go@v3
+          with:
+              go-version: 1.19
+              cache: true
+        - name: Build
+          run: go build -v
