@@ -9,4 +9,6 @@ func UserRoutes(app fiber.Router, handler *user.Handler) {
 	router := app.Group("/users")
 
 	router.Get("/", handler.FindUsers())
+
+	router.Post("/", handler.RegisterUser())
 }
