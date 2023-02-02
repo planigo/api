@@ -55,7 +55,7 @@ func (store *UserStore) CreateUser(user entities.User) (string, error) {
 }
 
 func (store *UserStore) FindUserByEmail(email string) (entities.User, error) {
-	var user entities.User
+	user := entities.User{}
 
 	query := "SELECT id, email, firstname, lastname, role, password, is_email_verified FROM User WHERE email = ?"
 	err := store.QueryRow(query, email).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role, &user.Password, &user.IsEmailVerified)
@@ -75,7 +75,13 @@ func (store *UserStore) UpdateUserById(id int) error {
 	//...
 }
 
-func (store *UserStore) FindUserById(id int) error {
-	panic("implement me")
-	//...
+func (store *UserStore) FindUserById(id string) (entities.User, error) {
+	user := &entities.User{}
+
+	query := "SELECT id, email, firstname, lastname, role FROM User WHERE id = ?"
+	err := store.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role)
+	if err != nil {
+		return *user, err
+	}
+	return *user, nil
 }

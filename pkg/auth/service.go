@@ -25,17 +25,25 @@ func NewHandler(store *store.Store, mailer *mail.Mailer, session *session.Store)
 func (r Handler) Login() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
-		userPayload := new(entities.User)
-		if err := ctx.BodyParser(&userPayload); err != nil {
-			log.Fatal(err)
+		user := &entities.User{}
+		if err := ctx.BodyParser(user); err != nil {
+			return err
 		}
 
-		user, err := r.UserStore.FindUserByEmail(userPayload.Email)
+		if user.Email == "" {
+			return ctx.Status(fiber.StatusBadRequest).SendString("Email is required.")
+		}
+
+		if user.Password == "" {
+			return ctx.Status(fiber.StatusBadRequest).SendString("Password is required.")
+		}
+
+		findedUser, err := r.UserStore.FindUserByEmail(user.Email)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userPayload.Password)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(findedUser.Password), []byte(user.Password)); err != nil {
 			log.Fatal(err)
 		}
 
@@ -45,9 +53,7 @@ func (r Handler) Login() fiber.Handler {
 		}
 
 		sid := sess.ID()
-		fmt.Println(sid)
-
-		sess.Set("uid", sid)
+		sess.Set(sid, findedUser.Id)
 		if err := sess.Save(); err != nil {
 			panic(err)
 		}
@@ -58,15 +64,20 @@ func (r Handler) Login() fiber.Handler {
 
 func (r Handler) Me() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+
 		sess, err := r.Session.Get(ctx)
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println(sess)
-		fmt.Println(sess.Get("uid"))
+		fmt.Println(sess.Get(sess.ID()))
 
-		return ctx.Status(http.StatusOK).JSON(fiber.Map{"isLoggedIn": true})
+		userById, err := r.UserStore.FindUserById(sess.Get(sess.ID()).(string))
+		if err != nil {
+			return err
+		}
+
+		return ctx.Status(http.StatusOK).JSON(userById)
 	}
 }
 
