@@ -12,7 +12,7 @@ func RequireLogin(r *session.Store) func(c *fiber.Ctx) error {
 		if err != nil {
 			panic(err)
 		}
-		if sess.Get("uid") == nil {
+		if sess.Get(sess.ID()) == nil {
 			return c.SendStatus(http.StatusUnauthorized)
 		}
 		return c.Next()

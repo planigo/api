@@ -29,22 +29,20 @@ func main() {
 
 	app := fiber.New()
 
-	session := session.New(session.Config{
-		Expiration: 48 * time.Hour,
-	})
-
+	session := session.New(session.Config{Expiration: 48 * time.Hour})
 	mailer := mail.New()
 	store := storeManager.NewStore(db)
 
+	// Middlewares
 	app.Use(logger.New())
 
-	// Api routes
 	api := app.Group("/api")
 
-	// User routes
+	// Controllers
 	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session}
 	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session}
 
+	// Routers
 	routes.UserRoutes(api, userHandler)
 	routes.AuthRoutes(api, authHandler)
 
