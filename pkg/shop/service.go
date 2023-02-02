@@ -40,9 +40,21 @@ func (sh ShopHandler) GetShopById() fiber.Handler {
 	}
 }
 
-func (sh ShopHandler) CreateShop(shop entities.Shop) fiber.Handler {
-	// TODO Implement function
-	panic("implement me")
+func (sh ShopHandler) CreateShop() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		newShop := new(entities.ShopRequest)
+		if err := ctx.BodyParser(newShop); err != nil {
+			return err
+		}
+
+		shop, err := sh.ShopStore.AddShop(*newShop)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return ctx.JSON(shop)
+	}
 }
 
 func (sh ShopHandler) EditShop() fiber.Handler {
@@ -54,8 +66,12 @@ func (sh ShopHandler) EditShop() fiber.Handler {
 			return err
 		}
 
-		shop, err := sh.ShopStore.UpdateShop(shopId, *shopEdited)
+		shopId, err := sh.ShopStore.UpdateShop(shopId, *shopEdited)
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		shop, err := sh.ShopStore.FindShopById(shopId)
 		if err != nil {
 			log.Fatal(err)
 		}

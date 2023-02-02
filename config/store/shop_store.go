@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"planigo/pkg/entities"
@@ -51,21 +52,34 @@ func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
 	return shop, nil
 }
 
-func (store *ShopStore) UpdateShop(shopId string, shopEdited entities.ShopRequest) (entities.Shop, error) {
+func (store *ShopStore) AddShop(newShop entities.ShopRequest) (string, error) {
+	row, err := store.Exec("INSERT INTO Shop (name, description, owner_id) VALUES (?, ?, ?);", newShop.Name, newShop.Description, newShop.OwnerID)
+
+	if err != nil {
+		return "", err
+	}
+
+	uuid, err := row.LastInsertId()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return fmt.Sprint(uuid), nil
+}
+
+func (store *ShopStore) UpdateShop(shopId string, shopEdited entities.ShopRequest) (string, error) {
 	row, err := store.Exec("UPDATE Shop SET name = ?, description = ? WHERE id = ?;", shopEdited.Name, shopEdited.Description, shopId)
 
 	if err != nil {
-		var shop entities.Shop
-		return shop, err
+		return "", err
 	}
 
 	if _, err = row.RowsAffected(); err != nil {
 		log.Fatal(err)
 	}
 
-	shop, _ := store.FindShopById(shopId)
-
-	return shop, nil
+	return shopId, nil
 }
 
 func (store *ShopStore) RemoveShop(shopId string) (int, error) {

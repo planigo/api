@@ -11,12 +11,9 @@ func ShopRoutes(app fiber.Router, handler *shop.ShopHandler) {
 	router.Get("/", handler.GetShops())
 	router.Get("/:shopId", handler.GetShopById())
 
+	router.Post("/", handler.CreateShop())
+
 	router.Patch("/:shopId", handler.EditShop())
 
 	router.Delete("/:shopId", handler.DeleteShop())
-
-	// TODO POST /store createStore
-	//router.Post("/", service.CreateStore)
-
-
 }
