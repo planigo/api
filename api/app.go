@@ -1,22 +1,23 @@
-package main
+package api
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/joho/godotenv"
 	"log"
 	"planigo/api/routes"
 	"planigo/config/database"
 	"planigo/config/mail"
 	storeManager "planigo/config/store"
 	"planigo/pkg/auth"
+	"planigo/pkg/shop"
 	"planigo/pkg/user"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/joho/godotenv"
 )
 
-func main() {
-
+func Start() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -33,7 +34,7 @@ func main() {
 
 	store := storeManager.NewStore(db)
 	mailer := mail.New()
-	session2 := session.New(sessionConfig)
+	session := session.New(sessionConfig)
 
 	// Middlewares
 	app.Use(logger.New())
@@ -41,12 +42,14 @@ func main() {
 	api := app.Group("/api")
 
 	// Controllers
-	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session2}
-	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session2}
+	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session}
+	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session}
+	shopHandler := &shop.ShopHandler{Store: store}
 
 	// Routers
 	routes.UserRoutes(api, userHandler)
 	routes.AuthRoutes(api, authHandler)
+	routes.ShopRoutes(api, shopHandler)
 
 	log.Fatal(app.Listen(":8080"))
 }

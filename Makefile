@@ -1,5 +1,5 @@
 start:
-	go run api/app.go
+	go run main.go
 
 dev:
 	air

@@ -7,7 +7,9 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./migrations/schema.sql:/docker-entrypoint-initdb.d/init-000.sql
+      - ./migrations/triggers.sql:/docker-entrypoint-initdb.d/init-001.sql
+      - ./migrations/data.sql:/docker-entrypoint-initdb.d/init-002.sql
     environment:
       MARIADB_ROOT_USERNAME: ${MARIADB_ROOT_USERNAME:-root}
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-password}
