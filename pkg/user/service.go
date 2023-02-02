@@ -2,8 +2,10 @@ package user
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"net/http"
 	"planigo/config/mail"
 	"planigo/config/store"
 	"planigo/pkg/entities"
@@ -12,10 +14,11 @@ import (
 type Handler struct {
 	*store.Store
 	*mail.Mailer
+	Session *session.Store
 }
 
-func NewHandler(store *store.Store, mailer *mail.Mailer) *Handler {
-	return &Handler{store, mailer}
+func NewHandler(store *store.Store, mailer *mail.Mailer, session *session.Store) *Handler {
+	return &Handler{store, mailer, session}
 }
 
 func (r Handler) FindUsers() fiber.Handler {
@@ -25,7 +28,7 @@ func (r Handler) FindUsers() fiber.Handler {
 			log.Fatal(err)
 		}
 
-		return ctx.JSON(users)
+		return ctx.Status(http.StatusCreated).JSON(users)
 	}
 }
 
@@ -50,7 +53,7 @@ func (r Handler) RegisterUser() fiber.Handler {
 
 		sendValidationEmail(r.Mailer, *userPayload)
 
-		return ctx.JSON(userPayload)
+		return ctx.SendStatus(http.StatusCreated)
 	}
 }
 
@@ -68,7 +71,7 @@ func sendValidationEmail(mailer *mail.Mailer, user entities.User) {
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",
-		Body:    "Veuillez valider votre compte sur ce lien pour pouvoir effectuer votre premier rendez-vous: http://planigo.fr/",
+		Body:    "Veuillez valider votre compte sur ce lien pour pouvoir effectuer votre premier rendez-vous: https://planigo.fr/",
 	}
 
 	mailer.Send(emailContent)
