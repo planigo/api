@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"planigo/pkg/entities"
+	"strconv"
 )
 
 type UserStore struct {
@@ -51,7 +52,7 @@ func (store *UserStore) CreateUser(user entities.User) (string, error) {
 	}
 	fmt.Println("User created with id: ", uuid)
 
-	return string(uuid), nil
+	return strconv.FormatInt(uuid, 10), nil
 }
 
 func (store *UserStore) FindUserByEmail(email string) (entities.User, error) {
