@@ -9,6 +9,7 @@ import (
 	"planigo/config/mail"
 	"planigo/config/store"
 	"planigo/pkg/entities"
+	"planigo/utils"
 )
 
 type Handler struct {
@@ -17,7 +18,7 @@ type Handler struct {
 	Session *session.Store
 }
 
-func NewHandler(store *store.Store, mailer *mail.Mailer, session *session.Store) *Handler {
+func New(store *store.Store, mailer *mail.Mailer, session *session.Store) *Handler {
 	return &Handler{store, mailer, session}
 }
 
@@ -34,32 +35,44 @@ func (r Handler) FindUsers() fiber.Handler {
 
 func (r Handler) RegisterUser() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		userPayload := new(entities.User)
 
-		if err := ctx.BodyParser(&userPayload); err != nil {
-			log.Fatal(err)
-		}
+		userPayload := ParseUserBody(ctx)
 
-		password, err := HashPassword(userPayload.Password)
-		if err != nil {
-			log.Fatal(err)
-		}
-
+		password := HashPassword(userPayload.Password)
 		userPayload.Password = password
 
-		if _, err = r.CreateUser(*userPayload); err != nil {
-			log.Fatal(err)
+		uuid, err := r.CreateUser(*userPayload)
+		if err != nil {
+			return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
 		}
 
-		sendValidationEmail(r.Mailer, *userPayload)
+		userPayload.Id = uuid
+
+		sendValidationEmail(r.Mailer, userPayload)
 
 		return ctx.SendStatus(http.StatusCreated)
 	}
 }
 
-func HashPassword(password string) (string, error) {
+func HashPassword(password string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(bytes)
+}
+
+func ParseUserBody(ctx *fiber.Ctx) *entities.User {
+	userPayload := new(entities.User)
+
+	if err := ctx.BodyParser(&userPayload); err != nil {
+		log.Fatal(err)
+	}
+
+	return userPayload
 }
 
 func CheckPasswordHash(password, hash string) bool {
@@ -67,11 +80,11 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func sendValidationEmail(mailer *mail.Mailer, user entities.User) {
+func sendValidationEmail(mailer *mail.Mailer, user *entities.User) {
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",
-		Body:    "Veuillez valider votre compte sur ce lien pour pouvoir effectuer votre premier rendez-vous: https://planigo.fr/",
+		Body:    "Bienvenue sur Planigo, votre application de prise de reservation en ligne. Merci de cliquer sur le lien suivant pour valider votre compte: http://localhost:3000/validate?token=" + utils.GenerateJWT(&utils.TokenPayload{ID: user.Id}),
 	}
 
 	mailer.Send(emailContent)

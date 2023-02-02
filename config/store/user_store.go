@@ -2,9 +2,8 @@ package store
 
 import (
 	"database/sql"
-	"fmt"
 	"planigo/pkg/entities"
-	"strconv"
+	"planigo/utils"
 )
 
 type UserStore struct {
@@ -40,19 +39,17 @@ func (store *UserStore) FindUsers() ([]entities.User, error) {
 }
 
 func (store *UserStore) CreateUser(user entities.User) (string, error) {
-	query := "INSERT INTO User (id, email, firstname, lastname, role, password) VALUES (?, ?, ?, ?, ?, ?)"
-	res, err := store.DB.Exec(query, "", user.Email, user.Firstname, user.Lastname, user.Role, user.Password)
-	if err != nil {
+	insertedUser := &entities.User{}
+
+	query := "INSERT INTO User (email, firstname, lastname, role, password) VALUES (?, ?, ?, ?, ?) RETURNING id, email"
+
+	if err := store.
+		QueryRow(query, user.Email, user.Firstname, user.Lastname, user.Role, user.Password).
+		Scan(&insertedUser.Id, &insertedUser.Email); err != nil {
 		return "", err
 	}
 
-	uuid, err := res.LastInsertId()
-	if err != nil {
-		return "", err
-	}
-	fmt.Println("User created with id: ", uuid)
-
-	return strconv.FormatInt(uuid, 10), nil
+	return insertedUser.Id, nil
 }
 
 func (store *UserStore) FindUserByEmail(email string) (entities.User, error) {
@@ -79,10 +76,37 @@ func (store *UserStore) UpdateUserById(id int) error {
 func (store *UserStore) FindUserById(id string) (entities.User, error) {
 	user := &entities.User{}
 
-	query := "SELECT id, email, firstname, lastname, role FROM User WHERE id = ?"
-	err := store.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role)
+	query := "SELECT id, email, firstname, lastname, role, is_email_verified FROM User WHERE id = ?"
+	err := store.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role, &user.IsEmailVerified)
 	if err != nil {
 		return *user, err
 	}
 	return *user, nil
+}
+
+func (store *UserStore) ValidateUserEmail(token string) error {
+
+	payload, err := utils.VerifyJWT(token)
+	if err != nil {
+		println("Error: VerifyJWT ", err.Error(), "\n")
+		return err
+	}
+
+	user := &entities.User{}
+	query := "SELECT id FROM User WHERE id = ? AND is_email_verified = 0"
+	err = store.QueryRow(query, payload.ID).Scan(&user.Id)
+	if err != nil {
+		println("Error: QueryRow ", err, "\n")
+		return err
+	}
+
+	println("User id: ", user.Id, "\n")
+
+	_, err = store.Exec("UPDATE User SET `is_email_verified` = 1 WHERE id = ?", user.Id)
+	if err != nil {
+		println("Error: Exec ", err, "\n")
+		return err
+	}
+
+	return nil
 }

@@ -24,4 +24,9 @@ func AuthRoutes(app fiber.Router, handler *auth.Handler) {
 		middlewares.IsLoggedIn(handler.Session),
 		handler.Logout(),
 	)
+
+	router.Get(
+		"/validate/:token",
+		handler.ValidateEmail(),
+	)
 }
