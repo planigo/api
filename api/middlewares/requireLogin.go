@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func RequireLogin(r *session.Store) func(c *fiber.Ctx) error {
+func IsLoggedIn(r *session.Store) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		sess, err := r.Get(c)
 		if err != nil {
@@ -15,6 +15,10 @@ func RequireLogin(r *session.Store) func(c *fiber.Ctx) error {
 		if sess.Get(sess.ID()) == nil {
 			return c.SendStatus(http.StatusUnauthorized)
 		}
+
+		c.Locals("userId", sess.Get(sess.ID()))
+		c.Locals("userRole", sess.Get("role"))
+
 		return c.Next()
 	}
 }

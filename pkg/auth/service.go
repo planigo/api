@@ -54,6 +54,7 @@ func (r Handler) Login() fiber.Handler {
 
 		sid := sess.ID()
 		sess.Set(sid, findedUser.Id)
+		sess.Set("role", findedUser.Role)
 		if err := sess.Save(); err != nil {
 			panic(err)
 		}
@@ -71,6 +72,7 @@ func (r Handler) Me() fiber.Handler {
 		}
 
 		fmt.Println(sess.Get(sess.ID()))
+		fmt.Println(sess.Get("role"))
 
 		userById, err := r.UserStore.FindUserById(sess.Get(sess.ID()).(string))
 		if err != nil {

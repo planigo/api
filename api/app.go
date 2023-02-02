@@ -29,9 +29,11 @@ func main() {
 
 	app := fiber.New()
 
-	session := session.New(session.Config{Expiration: 48 * time.Hour})
-	mailer := mail.New()
+	sessionConfig := session.Config{Expiration: 48 * time.Hour}
+
 	store := storeManager.NewStore(db)
+	mailer := mail.New()
+	session2 := session.New(sessionConfig)
 
 	// Middlewares
 	app.Use(logger.New())
@@ -39,8 +41,8 @@ func main() {
 	api := app.Group("/api")
 
 	// Controllers
-	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session}
-	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session}
+	userHandler := &user.Handler{Store: store, Mailer: mailer, Session: session2}
+	authHandler := &auth.Handler{Store: store, Mailer: mailer, Session: session2}
 
 	// Routers
 	routes.UserRoutes(api, userHandler)
