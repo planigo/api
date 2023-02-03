@@ -11,12 +11,21 @@ CREATE TABLE IF NOT EXISTS `User`
     `is_email_verified` BOOLEAN                             DEFAULT FALSE
 );
 
+CREATE TABLE IF NOT EXISTS `Category`
+(
+    `id`   VARCHAR(36) PRIMARY KEY NOT NULL,
+    `name` VARCHAR(255)            NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS `Shop`
 (
     `id`          VARCHAR(36) PRIMARY KEY NOT NULL,
     `name`        VARCHAR(255)            NOT NULL,
     `description` TEXT,
     `owner_id`    VARCHAR(36),
+    `category_id` VARCHAR(36),
+    CONSTRAINT `fk_shop_category`
+        FOREIGN KEY (`category_id`) REFERENCES `Category` (`id`),
     CONSTRAINT `fk_shop_owner`
         FOREIGN KEY (`owner_id`) REFERENCES `User` (`id`)
 );

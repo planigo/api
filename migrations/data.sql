@@ -6,10 +6,16 @@ VALUES
     ('customer2@gmail.com', 'Customer2', 'Client2', 'customer', '123456'),
     ('owner2@gmail.com', 'Owner2', 'Propriétaire2', 'owner', '123456');
 
-INSERT INTO Shop (name, description, owner_id)
+INSERT INTO Category (name)
 VALUES
-    ('Dentiste', 'Le meilleur dentiste de la capital', (SELECT id FROM User ORDER BY RAND() LIMIT 1)),
-    ('Barber', 'Coiffeu afro', (SELECT id FROM User ORDER BY RAND() LIMIT 1));
+    ('Coiffeur'),
+    ('Barber'),
+    ('Dentiste');
+
+INSERT INTO Shop (name, description, category_id, owner_id)
+VALUES
+    ('Dentiste', 'Le meilleur dentiste de la capital', (SELECT id FROM Category ORDER BY RAND() LIMIT 1), (SELECT id FROM User ORDER BY RAND() LIMIT 1)),
+    ('Barber', 'Coiffeu afro', (SELECT id FROM Category ORDER BY RAND() LIMIT 1), (SELECT id FROM User ORDER BY RAND() LIMIT 1));
 
 INSERT INTO Service (name, description, price, duration, shop_id)
 VALUES

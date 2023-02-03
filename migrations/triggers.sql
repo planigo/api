@@ -9,3 +9,5 @@ CREATE TRIGGER `insert_service`BEFORE INSERT ON `Service` FOR EACH ROW SET NEW.i
 CREATE TRIGGER `insert_reservation`BEFORE INSERT ON `Reservation` FOR EACH ROW SET NEW.id = UUID();
 
 CREATE TRIGGER `insert_hours`BEFORE INSERT ON `Hour` FOR EACH ROW SET NEW.id = UUID();
+
+CREATE TRIGGER `insert_category` BEFORE INSERT ON `Category` FOR EACH ROW SET NEW.id = UUID();
