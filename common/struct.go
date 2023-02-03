@@ -13,7 +13,7 @@ type Slot struct {
 	Duration      int    `json:"duration"`
 }
 
-type DetailledReservation struct {
+type DetailedReservation struct {
 	ReservationId string `json:"reservationId"`
 	ServiceId     string `json:"serviceId"`
 	ServiceName   string `json:"serviceName"`

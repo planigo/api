@@ -5,10 +5,10 @@ import (
 	"time"
 )
 
-func CreateEmptySlotsMapByShopHours(startHour string, endHour string) []common.DaySlot {
+func CreateEmptySlotsMapByShopHours(startHour string, endHour string, days int) []common.DaySlot {
 	var emptySlotsMap []common.DaySlot
 
-	for _, day := range NextSevenDays() {
+	for _, day := range NextXDays(days) {
 		var slot common.DaySlot
 		slot = common.DaySlot{
 			Date:  day.Format("2006-01-02"),
@@ -20,9 +20,9 @@ func CreateEmptySlotsMapByShopHours(startHour string, endHour string) []common.D
 	return emptySlotsMap
 }
 
-func NextSevenDays() []time.Time {
+func NextXDays(x int) []time.Time {
 	var dates []time.Time
-	for i := 0; i < 7; i++ {
+	for i := 0; i <= x; i++ {
 		date := time.Now().AddDate(0, 0, i)
 		dates = append(dates, date)
 	}
@@ -49,12 +49,12 @@ func ComputeEmptySlots(startHour string, endHour string) []common.Slot {
 	return slots
 }
 
-func FillEmptySlotsWithRevervationByDate(
+func FillEmptySlotsWithReservationByDate(
 	emptySlotsMap []common.DaySlot,
-	reservations []common.DetailledReservation,
+	reservations []common.DetailedReservation,
 ) []common.DaySlot {
 
-	reservationMap := makeReservationMap(reservations)
+	reservationMap := MakeReservationMap(reservations)
 
 	for i := range emptySlotsMap {
 		for j := range emptySlotsMap[i].Slots {
@@ -69,10 +69,10 @@ func FillEmptySlotsWithRevervationByDate(
 	return emptySlotsMap
 }
 
-func makeReservationMap(
-	reservations []common.DetailledReservation,
-) map[string]common.DetailledReservation {
-	reservationMap := make(map[string]common.DetailledReservation)
+func MakeReservationMap(
+	reservations []common.DetailedReservation,
+) map[string]common.DetailedReservation {
+	reservationMap := make(map[string]common.DetailedReservation)
 
 	for _, reservation := range reservations {
 		reservationDate, _ := time.Parse("2006-01-02 15:04:05", reservation.Start)

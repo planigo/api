@@ -19,7 +19,7 @@ func New(store *store.Store, session *session.Store) *Handler {
 	return &Handler{store, session}
 }
 
-func (h Handler) GetResevationByShopId() fiber.Handler {
+func (h Handler) GetReservationByShopId() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		shopId := ctx.Params("shopId")
@@ -44,12 +44,12 @@ func (h Handler) GetResevationByShopId() fiber.Handler {
 		//	})
 		//}
 
-		emptySlots := utils.CreateEmptySlotsMapByShopHours("09:00:00", "18:00:00")
+		emptySlots := utils.CreateEmptySlotsMapByShopHours("09:00:00", "18:00:00", 6)
 
 		return ctx.
 			Status(http.StatusOK).
 			JSON(&fiber.Map{
-				"data": utils.FillEmptySlotsWithRevervationByDate(emptySlots, bookedReservations),
+				"data": utils.FillEmptySlotsWithReservationByDate(emptySlots, bookedReservations),
 			})
 	}
 }

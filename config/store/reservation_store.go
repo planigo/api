@@ -20,8 +20,8 @@ func NewReservationStore(db *sql.DB) *ReservationStore {
 	}
 }
 
-func (r ReservationStore) GetReservationsByShopId(id string) ([]common.DetailledReservation, error) {
-	var reservationList []common.DetailledReservation
+func (r ReservationStore) GetReservationsByShopId(id string) ([]common.DetailedReservation, error) {
+	var reservationList []common.DetailedReservation
 
 	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.service_id = s.id AND s.shop_id = ?;"
 	rows, err := r.Query(query, id)
@@ -33,7 +33,7 @@ func (r ReservationStore) GetReservationsByShopId(id string) ([]common.Detailled
 	// get next week date by day of week
 
 	for rows.Next() {
-		reservation := common.DetailledReservation{}
+		reservation := common.DetailedReservation{}
 		startDate, _ := time.Parse("2006-01-02 15:04:05", reservation.Start)
 		fmt.Println(startDate)
 		duration, _ := strconv.Atoi(reservation.Duration)
@@ -71,8 +71,8 @@ func (r ReservationStore) InsertReservation(serviceId string, start string, user
 	return reservation.Id, nil
 }
 
-func (r ReservationStore) GetReservationById(id string) (common.DetailledReservation, error) {
-	var reservation common.DetailledReservation
+func (r ReservationStore) GetReservationById(id string) (common.DetailedReservation, error) {
+	var reservation common.DetailedReservation
 	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.id = ?;"
 	err := r.
 		QueryRow(query, id).
@@ -96,8 +96,8 @@ func (r ReservationStore) BookReservation(
 	shopId string,
 	start string,
 	userId string,
-) (common.DetailledReservation, error) {
-	serviceReservation := common.DetailledReservation{}
+) (common.DetailedReservation, error) {
+	serviceReservation := common.DetailedReservation{}
 	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ?;"
 	rows, err := r.Query(query, shopId, start)
 	if rows.Next() {

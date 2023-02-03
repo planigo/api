@@ -8,7 +8,7 @@ import (
 func ReservationRoutes(app fiber.Router, handler *reservation.Handler) {
 	r := app.Group("/reservation")
 
-	r.Get("/:shopId", handler.GetResevationByShopId())
+	r.Get("/:shopId", handler.GetReservationByShopId())
 
 	r.Post("/", handler.BookReservationByShopId())
 
