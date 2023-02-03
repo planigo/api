@@ -13,6 +13,6 @@ RUN go mod download && go mod verify && go build -o build/app api/app.go
 FROM scratch AS FINAL
 
 WORKDIR /main
-COPY --from=BUILDER /build/app .
+COPY --from=BUILDER /app .
 
 CMD ["./app"]
