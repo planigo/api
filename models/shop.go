@@ -1,4 +1,4 @@
-package entities
+package models
 
 type Shop struct {
 	Id          string `json:"id"`

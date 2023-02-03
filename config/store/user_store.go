@@ -2,7 +2,7 @@ package store
 
 import (
 	"database/sql"
-	"planigo/pkg/entities"
+	"planigo/models"
 	"planigo/utils"
 )
 
@@ -16,8 +16,8 @@ func NewUserStore(db *sql.DB) *UserStore {
 	}
 }
 
-func (store *UserStore) FindUsers() ([]entities.User, error) {
-	var users []entities.User
+func (store *UserStore) FindUsers() ([]models.User, error) {
+	var users []models.User
 
 	rows, err := store.Query("SELECT id, firstname, lastname, role, is_email_verified FROM User")
 	if err != nil {
@@ -25,7 +25,7 @@ func (store *UserStore) FindUsers() ([]entities.User, error) {
 	}
 
 	for rows.Next() {
-		var userRow entities.User
+		var userRow models.User
 		if err := rows.Scan(&userRow.Id, &userRow.Firstname, &userRow.Lastname, &userRow.Role, &userRow.IsEmailVerified); err != nil {
 			return users, err
 		}
@@ -38,8 +38,8 @@ func (store *UserStore) FindUsers() ([]entities.User, error) {
 	return users, nil
 }
 
-func (store *UserStore) CreateUser(user entities.User) (string, error) {
-	insertedUser := &entities.User{}
+func (store *UserStore) CreateUser(user models.User) (string, error) {
+	insertedUser := &models.User{}
 
 	query := "INSERT INTO User (email, firstname, lastname, role, password) VALUES (?, ?, ?, ?, ?) RETURNING id, email"
 
@@ -52,8 +52,8 @@ func (store *UserStore) CreateUser(user entities.User) (string, error) {
 	return insertedUser.Id, nil
 }
 
-func (store *UserStore) FindUserByEmail(email string) (entities.User, error) {
-	user := entities.User{}
+func (store *UserStore) FindUserByEmail(email string) (models.User, error) {
+	user := models.User{}
 
 	query := "SELECT id, email, firstname, lastname, role, password, is_email_verified FROM User WHERE email = ?"
 	err := store.QueryRow(query, email).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role, &user.Password, &user.IsEmailVerified)
@@ -73,8 +73,8 @@ func (store *UserStore) UpdateUserById(id int) error {
 	//...
 }
 
-func (store *UserStore) FindUserById(id string) (entities.User, error) {
-	user := &entities.User{}
+func (store *UserStore) FindUserById(id string) (models.User, error) {
+	user := &models.User{}
 
 	query := "SELECT id, email, firstname, lastname, role, is_email_verified FROM User WHERE id = ?"
 	err := store.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.Firstname, &user.Lastname, &user.Role, &user.IsEmailVerified)
@@ -92,7 +92,7 @@ func (store *UserStore) ValidateUserEmail(token string) error {
 		return err
 	}
 
-	user := &entities.User{}
+	user := &models.User{}
 	query := "SELECT id FROM User WHERE id = ? AND is_email_verified = 0"
 	err = store.QueryRow(query, payload.ID).Scan(&user.Id)
 	if err != nil {

@@ -2,10 +2,10 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"planigo/pkg/shop"
+	"planigo/handlers"
 )
 
-func ShopRoutes(app fiber.Router, handler *shop.Handler) {
+func ShopRoutes(app fiber.Router, handler *handlers.ShopHandler) {
 	router := app.Group("/shops")
 
 	router.Get("/", handler.GetShops())

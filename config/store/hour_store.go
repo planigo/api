@@ -2,7 +2,7 @@ package store
 
 import (
 	"database/sql"
-	"planigo/pkg/entities"
+	"planigo/models"
 )
 
 type HourStore struct {
@@ -15,8 +15,8 @@ func newHourStore(db *sql.DB) *HourStore {
 	}
 }
 
-func (s HourStore) GetHours() ([]entities.Hour, error) {
-	var hours []entities.Hour
+func (s HourStore) GetHours() ([]models.Hour, error) {
+	var hours []models.Hour
 
 	query := "SELECT id, start, end, day, shop_id FROM Hour"
 
@@ -26,7 +26,7 @@ func (s HourStore) GetHours() ([]entities.Hour, error) {
 	}
 
 	for rows.Next() {
-		hour := entities.Hour{}
+		hour := models.Hour{}
 
 		if err := rows.Scan(&hour.Id, &hour.Start, &hour.End, &hour.Day, &hour.ShopID); err != nil {
 			return hours, err
@@ -38,8 +38,8 @@ func (s HourStore) GetHours() ([]entities.Hour, error) {
 	return hours, nil
 }
 
-func (s HourStore) CreateHour(hour entities.Hour) (entities.Hour, error) {
-	insertedHour := entities.Hour{}
+func (s HourStore) CreateHour(hour models.Hour) (models.Hour, error) {
+	insertedHour := models.Hour{}
 
 	query := "INSERT INTO Hour (start, end, day, shop_id) VALUES (?, ?, ?, ?) RETURNING id, start, end, day, shop_id"
 
@@ -52,8 +52,8 @@ func (s HourStore) CreateHour(hour entities.Hour) (entities.Hour, error) {
 	return insertedHour, nil
 }
 
-func (s HourStore) GetHourById(shopId int) (entities.Hour, error) {
-	hour := entities.Hour{}
+func (s HourStore) GetHourById(shopId int) (models.Hour, error) {
+	hour := models.Hour{}
 
 	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ?"
 
@@ -76,8 +76,8 @@ func (s HourStore) DeleteHour(id string) error {
 	return nil
 }
 
-func (s HourStore) UpdateHour(id string, hour entities.Hour) (entities.Hour, error) {
-	updatedHour := entities.Hour{}
+func (s HourStore) UpdateHour(id string, hour models.Hour) (models.Hour, error) {
+	updatedHour := models.Hour{}
 
 	queryUpdate := "UPDATE Hour SET start = ?, end = ?, day = ? WHERE id = ?"
 	if _, err := s.Exec(queryUpdate, hour.Start, hour.End, hour.Day, id); err != nil {

@@ -2,15 +2,14 @@ package api
 
 import (
 	"fmt"
-	"log"
-	"planigo/api/routes"
-	"planigo/config/database"
-	"planigo/pkg"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	"log"
+	"planigo/api/routes"
+	"planigo/config/database"
+	"planigo/handlers"
 )
 
 func Start() {
@@ -34,14 +33,14 @@ func Start() {
 
 	api := app.Group("/api")
 
-	handlers := pkg.NewServices(db)
+	h := handlers.New(db)
 
 	// Routers
-	routes.UserRoutes(api, handlers.UserHandler)
-	routes.AuthRoutes(api, handlers.AuthHandler)
-	routes.ShopRoutes(api, handlers.ShopHandler)
-	routes.HourRoutes(api, handlers.HourHandler)
-	routes.ServicesRoutes(api, handlers.ServiceHandler)
+	routes.UserRoutes(api, h.UserHandler)
+	routes.AuthRoutes(api, h.AuthHandler)
+	routes.ShopRoutes(api, h.ShopHandler)
+	routes.HourRoutes(api, h.HourHandler)
+	routes.ServicesRoutes(api, h.ServiceHandler)
 
 	// Endpoint for 'Not Found'.
 	app.All("*", func(c *fiber.Ctx) error {

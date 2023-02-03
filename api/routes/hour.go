@@ -2,10 +2,10 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"planigo/pkg/hour"
+	"planigo/handlers"
 )
 
-func HourRoutes(app fiber.Router, handler *hour.Handler) {
+func HourRoutes(app fiber.Router, handler *handlers.HourHandler) {
 	hourRoutes := app.Group("/hours")
 
 	hourRoutes.Get("/", handler.GetHours())

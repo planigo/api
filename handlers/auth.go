@@ -1,4 +1,4 @@
-package auth
+package handlers
 
 import (
 	"fmt"
@@ -7,24 +7,19 @@ import (
 	"net/http"
 	"planigo/config/mail"
 	"planigo/config/store"
-	"planigo/pkg/entities"
-	user2 "planigo/pkg/user"
+	"planigo/models"
 )
 
-type Handler struct {
+type AuthHandler struct {
 	*store.Store
 	*mail.Mailer
 	Session *session.Store
 }
 
-func New(store *store.Store, mailer *mail.Mailer, session *session.Store) *Handler {
-	return &Handler{store, mailer, session}
-}
-
-func (r Handler) Login() fiber.Handler {
+func (r AuthHandler) Login() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
-		user := &entities.User{}
+		user := &models.User{}
 		if err := ctx.BodyParser(user); err != nil {
 			return ctx.SendStatus(fiber.StatusInternalServerError)
 		}
@@ -44,7 +39,7 @@ func (r Handler) Login() fiber.Handler {
 			})
 		}
 
-		if isSamePassword := user2.CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
+		if isSamePassword := CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
 			return ctx.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
 				"status":  "fail",
 				"message": "Wrong email or password!",
@@ -68,7 +63,7 @@ func (r Handler) Login() fiber.Handler {
 	}
 }
 
-func (r Handler) Me() fiber.Handler {
+func (r AuthHandler) Me() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		sess, err := r.Session.Get(ctx)
@@ -88,7 +83,7 @@ func (r Handler) Me() fiber.Handler {
 	}
 }
 
-func (r Handler) Logout() fiber.Handler {
+func (r AuthHandler) Logout() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		sess, err := r.Session.Get(ctx)
 		if err != nil {
@@ -104,7 +99,7 @@ func (r Handler) Logout() fiber.Handler {
 	}
 }
 
-func (r Handler) ValidateEmail() fiber.Handler {
+func (r AuthHandler) ValidateEmail() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := c.Params("token")
 		if err := r.UserStore.ValidateUserEmail(token); err != nil {

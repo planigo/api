@@ -1,12 +1,11 @@
 package routes
 
 import (
-	"planigo/pkg/service"
-
 	"github.com/gofiber/fiber/v2"
+	"planigo/handlers"
 )
 
-func ServicesRoutes(app fiber.Router, handler *service.ServiceHandler) {
+func ServicesRoutes(app fiber.Router, handler *handlers.ServiceHandler) {
 	router := app.Group("/services")
 
 	router.Get("/", handler.GetServices())

@@ -1,4 +1,4 @@
-package hour
+package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -6,16 +6,16 @@ import (
 	"log"
 	"net/http"
 	"planigo/config/store"
-	"planigo/pkg/entities"
+	"planigo/models"
 	"strconv"
 )
 
-type Handler struct {
+type HourHandler struct {
 	*store.Store
 	Session *session.Store
 }
 
-func (h Handler) GetHours() fiber.Handler {
+func (h HourHandler) GetHours() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		hours, err := h.HourStore.GetHours()
 		if err != nil {
@@ -29,7 +29,7 @@ func (h Handler) GetHours() fiber.Handler {
 	}
 }
 
-func (h Handler) CreateHour() fiber.Handler {
+func (h HourHandler) CreateHour() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		hour := parseHourBody(c)
 
@@ -45,7 +45,7 @@ func (h Handler) CreateHour() fiber.Handler {
 	}
 }
 
-func (h Handler) GetHourById() fiber.Handler {
+func (h HourHandler) GetHourById() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id, _ := strconv.Atoi(c.Params("id"))
 
@@ -61,7 +61,7 @@ func (h Handler) GetHourById() fiber.Handler {
 	}
 }
 
-func (h Handler) DeleteHour() fiber.Handler {
+func (h HourHandler) DeleteHour() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 
@@ -79,7 +79,7 @@ func (h Handler) DeleteHour() fiber.Handler {
 	}
 }
 
-func (h Handler) UpdateHour() fiber.Handler {
+func (h HourHandler) UpdateHour() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 		updatedHour := parseHourBody(c)
@@ -97,8 +97,8 @@ func (h Handler) UpdateHour() fiber.Handler {
 	}
 }
 
-func parseHourBody(c *fiber.Ctx) *entities.Hour {
-	hour := new(entities.Hour)
+func parseHourBody(c *fiber.Ctx) *models.Hour {
+	hour := new(models.Hour)
 	if err := c.BodyParser(hour); err != nil {
 		log.Fatal(err)
 	}

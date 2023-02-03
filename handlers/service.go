@@ -1,23 +1,18 @@
-package service
+package handlers
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/config/store"
-	"planigo/pkg/entities"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"planigo/models"
 )
 
 type ServiceHandler struct {
 	*store.Store
 	Session *session.Store
-}
-
-func New(store *store.Store, session *session.Store) *ServiceHandler {
-	return &ServiceHandler{store, session}
 }
 
 func (sh ServiceHandler) GetServices() fiber.Handler {
@@ -26,7 +21,7 @@ func (sh ServiceHandler) GetServices() fiber.Handler {
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"statusCode": http.StatusInternalServerError,
-				"message": err.Error(),
+				"message":    err.Error(),
 			})
 		}
 
@@ -53,7 +48,7 @@ func (sh ServiceHandler) GetServiceById() fiber.Handler {
 
 func (sh ServiceHandler) CreateService() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		newService := new(entities.Service)
+		newService := new(models.Service)
 		if err := ctx.BodyParser(newService); err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"statusCode": http.StatusInternalServerError,
@@ -78,7 +73,7 @@ func (sh ServiceHandler) CreateService() fiber.Handler {
 
 func (sh ServiceHandler) EditService() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		serviceEdited := new(entities.Service)
+		serviceEdited := new(models.Service)
 		serviceId := ctx.Params("serviceId")
 
 		if err := ctx.BodyParser(serviceEdited); err != nil {

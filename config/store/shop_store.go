@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"planigo/pkg/entities"
+	"planigo/models"
 )
 
 type ShopStore struct {
@@ -17,8 +17,8 @@ func NewShopStore(db *sql.DB) *ShopStore {
 	}
 }
 
-func (store *ShopStore) FindShops() ([]entities.Shop, error) {
-	var shops []entities.Shop
+func (store *ShopStore) FindShops() ([]models.Shop, error) {
+	var shops []models.Shop
 
 	rows, err := store.Query("SELECT * FROM Shop")
 	if err != nil {
@@ -26,7 +26,7 @@ func (store *ShopStore) FindShops() ([]entities.Shop, error) {
 	}
 
 	for rows.Next() {
-		var shopRow entities.Shop
+		var shopRow models.Shop
 		if err := rows.Scan(&shopRow.Id, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
 			return shops, err
 		}
@@ -39,8 +39,8 @@ func (store *ShopStore) FindShops() ([]entities.Shop, error) {
 	return shops, nil
 }
 
-func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
-	var shop entities.Shop
+func (store *ShopStore) FindShopById(shopId string) (models.Shop, error) {
+	var shop models.Shop
 
 	row := store.QueryRow("SELECT * FROM Shop WHERE id = ?;", shopId)
 
@@ -51,8 +51,8 @@ func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
 	return shop, nil
 }
 
-func (store *ShopStore) AddShop(newShop entities.ShopRequest) (entities.Shop, error) {
-	insertedShop := new(entities.Shop)
+func (store *ShopStore) AddShop(newShop models.ShopRequest) (models.Shop, error) {
+	insertedShop := new(models.Shop)
 
 	query := "INSERT INTO Shop (name, description, owner_id, category_id) VALUES (?, ?, ?, ?) RETURNING id, name, description, category_id"
 
@@ -63,7 +63,7 @@ func (store *ShopStore) AddShop(newShop entities.ShopRequest) (entities.Shop, er
 	return *insertedShop, nil
 }
 
-func (store *ShopStore) UpdateShop(shopId string, shopEdited entities.ShopRequest) (string, error) {
+func (store *ShopStore) UpdateShop(shopId string, shopEdited models.ShopRequest) (string, error) {
 	row, err := store.Exec("UPDATE Shop SET name = ?, description = ?, category_id = ? WHERE id = ?;", shopEdited.Name, shopEdited.Description, shopEdited.CategoryID, shopId)
 
 	if err != nil {

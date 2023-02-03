@@ -1,4 +1,4 @@
-package entities
+package models
 
 type Hour struct {
 	Id     string `json:"id"`

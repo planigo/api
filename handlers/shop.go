@@ -1,24 +1,19 @@
-package shop
+package handlers
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"planigo/config/store"
-	"planigo/pkg/entities"
-
-	"github.com/gofiber/fiber/v2"
+	"planigo/models"
 )
 
-type Handler struct {
+type ShopHandler struct {
 	*store.Store
 	Session *session.Store
 }
 
-func New(store *store.Store, session *session.Store) *Handler {
-	return &Handler{store, session}
-}
-
-func (h Handler) GetShops() fiber.Handler {
+func (h ShopHandler) GetShops() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shops, err := h.ShopStore.FindShops()
 		if err != nil {
@@ -29,7 +24,7 @@ func (h Handler) GetShops() fiber.Handler {
 	}
 }
 
-func (h Handler) GetShopById() fiber.Handler {
+func (h ShopHandler) GetShopById() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shopId := ctx.Params("shopId")
 
@@ -42,9 +37,9 @@ func (h Handler) GetShopById() fiber.Handler {
 	}
 }
 
-func (h Handler) CreateShop() fiber.Handler {
+func (h ShopHandler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		newShop := new(entities.ShopRequest)
+		newShop := new(models.ShopRequest)
 		if err := ctx.BodyParser(newShop); err != nil {
 			return err
 		}
@@ -59,9 +54,9 @@ func (h Handler) CreateShop() fiber.Handler {
 	}
 }
 
-func (h Handler) EditShop() fiber.Handler {
+func (h ShopHandler) EditShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		shopEdited := new(entities.ShopRequest)
+		shopEdited := new(models.ShopRequest)
 		shopId := ctx.Params("shopId")
 
 		if err := ctx.BodyParser(shopEdited); err != nil {
@@ -82,7 +77,7 @@ func (h Handler) EditShop() fiber.Handler {
 	}
 }
 
-func (h Handler) DeleteShop() fiber.Handler {
+func (h ShopHandler) DeleteShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		shopId := ctx.Params("shopId")
 

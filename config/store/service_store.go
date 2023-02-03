@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"planigo/pkg/entities"
+	"planigo/models"
 )
 
 type ServiceStore struct {
@@ -17,8 +17,8 @@ func NewServiceStore(db *sql.DB) *ServiceStore {
 	}
 }
 
-func (store *ServiceStore) FindServices() ([]entities.Service, error) {
-	var services []entities.Service
+func (store *ServiceStore) FindServices() ([]models.Service, error) {
+	var services []models.Service
 
 	rows, err := store.Query("SELECT * FROM Service")
 
@@ -27,7 +27,7 @@ func (store *ServiceStore) FindServices() ([]entities.Service, error) {
 	}
 
 	for rows.Next() {
-		var serviceRow entities.Service
+		var serviceRow models.Service
 		if err := rows.Scan(
 			&serviceRow.Id,
 			&serviceRow.Name,
@@ -47,8 +47,8 @@ func (store *ServiceStore) FindServices() ([]entities.Service, error) {
 	return services, nil
 }
 
-func (store *ServiceStore) FindServiceById(serviceId string) (entities.Service, error) {
-	var service entities.Service
+func (store *ServiceStore) FindServiceById(serviceId string) (models.Service, error) {
+	var service models.Service
 
 	row := store.QueryRow("SELECT * FROM Service WHERE id = ?;", serviceId)
 
@@ -65,8 +65,8 @@ func (store *ServiceStore) FindServiceById(serviceId string) (entities.Service, 
 	return service, nil
 }
 
-func (store *ServiceStore) AddService(newService entities.Service) (string, error) {
-	insertedService := new(entities.Service)
+func (store *ServiceStore) AddService(newService models.Service) (string, error) {
+	insertedService := new(models.Service)
 	query := "INSERT INTO Service (name, description, price, duration, shop_id) VALUES (?, ?, ?, ?, ?) RETURNING id"
 	if err := store.
 		QueryRow(query, newService.Name, newService.Description, newService.Price, newService.Duration, newService.ShopID).
@@ -77,7 +77,7 @@ func (store *ServiceStore) AddService(newService entities.Service) (string, erro
 	return insertedService.Id, nil
 }
 
-func (store *ServiceStore) UpdateService(serviceId string, editedService entities.Service) (string, error) {
+func (store *ServiceStore) UpdateService(serviceId string, editedService models.Service) (string, error) {
 	row, err := store.Exec("UPDATE Service SET name = ?, description = ?, price = ?, duration = ? WHERE id = ?;", editedService.Name, editedService.Description, editedService.Price, editedService.Duration, serviceId)
 
 	if err != nil {

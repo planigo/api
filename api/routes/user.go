@@ -2,10 +2,10 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"planigo/pkg/user"
+	"planigo/handlers"
 )
 
-func UserRoutes(app fiber.Router, handler *user.Handler) {
+func UserRoutes(app fiber.Router, handler *handlers.UserHandler) {
 	router := app.Group("/users")
 
 	router.Get("/", handler.FindUsers())

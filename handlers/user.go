@@ -1,4 +1,4 @@
-package user
+package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -8,21 +8,17 @@ import (
 	"net/http"
 	"planigo/config/mail"
 	"planigo/config/store"
-	"planigo/pkg/entities"
+	"planigo/models"
 	"planigo/utils"
 )
 
-type Handler struct {
+type UserHandler struct {
 	*store.Store
 	*mail.Mailer
 	Session *session.Store
 }
 
-func New(store *store.Store, mailer *mail.Mailer, session *session.Store) *Handler {
-	return &Handler{store, mailer, session}
-}
-
-func (r Handler) FindUsers() fiber.Handler {
+func (r UserHandler) FindUsers() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		users, err := r.UserStore.FindUsers()
 		if err != nil {
@@ -33,7 +29,7 @@ func (r Handler) FindUsers() fiber.Handler {
 	}
 }
 
-func (r Handler) RegisterUser() fiber.Handler {
+func (r UserHandler) RegisterUser() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		userPayload := ParseUserBody(ctx)
@@ -65,8 +61,8 @@ func HashPassword(password string) string {
 	return string(bytes)
 }
 
-func ParseUserBody(ctx *fiber.Ctx) *entities.User {
-	userPayload := new(entities.User)
+func ParseUserBody(ctx *fiber.Ctx) *models.User {
+	userPayload := new(models.User)
 
 	if err := ctx.BodyParser(&userPayload); err != nil {
 		log.Fatal(err)
@@ -80,7 +76,7 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func sendValidationEmail(mailer *mail.Mailer, user *entities.User) {
+func sendValidationEmail(mailer *mail.Mailer, user *models.User) {
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",

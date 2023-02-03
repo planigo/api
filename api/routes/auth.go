@@ -3,11 +3,10 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"planigo/api/middlewares"
-
-	"planigo/pkg/auth"
+	"planigo/handlers"
 )
 
-func AuthRoutes(app fiber.Router, handler *auth.Handler) {
+func AuthRoutes(app fiber.Router, handler *handlers.AuthHandler) {
 	router := app.Group("/auth")
 
 	router.Post("/login", handler.Login())

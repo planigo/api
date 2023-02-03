@@ -1,4 +1,4 @@
-package entities
+package models
 
 type Service struct {
 	Id          string  `json:"id"`
