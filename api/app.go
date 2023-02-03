@@ -40,6 +40,8 @@ func Start() {
 	routes.UserRoutes(api, handlers.UserHandler)
 	routes.AuthRoutes(api, handlers.AuthHandler)
 	routes.ShopRoutes(api, handlers.ShopHandler)
+	routes.HourRoutes(api, handlers.HourHandler)
+	routes.ServicesRoutes(api, handlers.ServiceHandler)
 	routes.ReservationRoutes(api, handlers.ReservationHandler)
 
 	// Endpoint for 'Not Found'.
