@@ -6,17 +6,17 @@ import (
 	"planigo/config/mail"
 	storeManager "planigo/config/store"
 	"planigo/pkg/auth"
-	"planigo/pkg/hour"
+	"planigo/pkg/reservation"
 	"planigo/pkg/shop"
 	"planigo/pkg/user"
 	"time"
 )
 
 type Services struct {
-	UserHandler *user.Handler
-	AuthHandler *auth.Handler
-	ShopHandler *shop.Handler
-	HourHandler *hour.Handler
+	UserHandler        *user.Handler
+	AuthHandler        *auth.Handler
+	ShopHandler        *shop.Handler
+	ReservationHandler *reservation.Handler
 }
 
 func NewServices(db *sql.DB) *Services {
@@ -26,9 +26,9 @@ func NewServices(db *sql.DB) *Services {
 	session := session.New(sessionConfig)
 
 	return &Services{
-		UserHandler: &user.Handler{Store: store, Mailer: mailer, Session: session},
-		AuthHandler: &auth.Handler{Store: store, Mailer: mailer, Session: session},
-		ShopHandler: &shop.Handler{Store: store, Session: session},
-		HourHandler: &hour.Handler{Store: store, Session: session},
+		UserHandler:        &user.Handler{Store: store, Mailer: mailer, Session: session},
+		AuthHandler:        &auth.Handler{Store: store, Mailer: mailer, Session: session},
+		ShopHandler:        &shop.Handler{Store: store, Session: session},
+		ReservationHandler: &reservation.Handler{Store: store, Session: session},
 	}
 }
