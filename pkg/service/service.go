@@ -26,7 +26,22 @@ func (sh ServiceHandler) GetServices() fiber.Handler {
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"statusCode": http.StatusInternalServerError,
-				"message": err.Error(),
+				"message":    err.Error(),
+			})
+		}
+
+		return ctx.JSON(services)
+	}
+}
+
+func (sh ServiceHandler) GetServicesByShopId() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		shopId := ctx.Params("shopId")
+		services, err := sh.ServiceStore.FindServicesByShopId(shopId)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+				"statusCode": http.StatusInternalServerError,
+				"message":    err.Error(),
 			})
 		}
 

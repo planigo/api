@@ -65,6 +65,36 @@ func (store *ServiceStore) FindServiceById(serviceId string) (entities.Service, 
 	return service, nil
 }
 
+func (store *ServiceStore) FindServicesByShopId(shopId string) ([]entities.Service, error) {
+	var services []entities.Service
+
+	rows, err := store.Query("SELECT * FROM Service WHERE shop_id = ?;", shopId)
+
+	if err != nil {
+		return services, err
+	}
+
+	for rows.Next() {
+		var serviceRow entities.Service
+		if err := rows.Scan(
+			&serviceRow.Id,
+			&serviceRow.Name,
+			&serviceRow.Description,
+			&serviceRow.Price,
+			&serviceRow.Duration,
+			&serviceRow.ShopID); err != nil {
+			return services, err
+		}
+		services = append(services, serviceRow)
+	}
+
+	if err := rows.Err(); err != nil {
+		return services, err
+	}
+
+	return services, nil
+}
+
 func (store *ServiceStore) AddService(newService entities.Service) (string, error) {
 	insertedService := new(entities.Service)
 	query := "INSERT INTO Service (name, description, price, duration, shop_id) VALUES (?, ?, ?, ?, ?) RETURNING id"
