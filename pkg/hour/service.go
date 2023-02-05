@@ -29,6 +29,21 @@ func (h Handler) GetHours() fiber.Handler {
 	}
 }
 
+func (h Handler) GetHoursByShopId() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		shopId := ctx.Params("shopId")
+		hours, err := h.HourStore.FindHoursByShopId(shopId)
+		if err != nil {
+			return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return ctx.JSON(hours)
+	}
+}
+
 func (h Handler) CreateHour() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		hour := parseHourBody(c)
