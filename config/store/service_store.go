@@ -88,10 +88,6 @@ func (store *ServiceStore) FindServicesByShopId(shopId string) ([]entities.Servi
 		services = append(services, serviceRow)
 	}
 
-	if err := rows.Err(); err != nil {
-		return services, err
-	}
-
 	return services, nil
 }
 
