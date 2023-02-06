@@ -42,6 +42,7 @@ func Start() {
 	routes.ShopRoutes(api, handlers.ShopHandler)
 	routes.HourRoutes(api, handlers.HourHandler)
 	routes.ServicesRoutes(api, handlers.ServiceHandler)
+	routes.CategoryRoutes(api, handlers.CategoryHandler)
 	routes.ReservationRoutes(api, handlers.ReservationHandler)
 
 	// Endpoint for 'Not Found'.

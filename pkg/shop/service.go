@@ -94,3 +94,16 @@ func (h Handler) DeleteShop() fiber.Handler {
 		return ctx.SendStatus(code)
 	}
 }
+
+func (h Handler) GetShopsByCategory() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		categoryId := ctx.Params("categoryId")
+
+		shops, err := h.ShopStore.FindShopsByCategory(categoryId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return ctx.JSON(shops)
+	}
+}

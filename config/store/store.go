@@ -7,6 +7,7 @@ type Store struct {
 	*ServiceStore
 	*ShopStore
 	*HourStore
+	*CategoryStore
 	*ReservationStore
 }
 
@@ -16,6 +17,7 @@ func NewStore(db *sql.DB) *Store {
 		NewServiceStore(db),
 		NewShopStore(db),
 		newHourStore(db),
+		newCategoryStore(db),
 		NewReservationStore(db),
 	}
 }
