@@ -42,6 +42,7 @@ func Start() {
 	routes.ShopRoutes(api, handlers.ShopHandler)
 	routes.HourRoutes(api, handlers.HourHandler)
 	routes.ServicesRoutes(api, handlers.ServiceHandler)
+	routes.CategoryRoutes(api, handlers.CategoryHandler)
 
 	// Endpoint for 'Not Found'.
 	app.All("*", func(c *fiber.Ctx) error {

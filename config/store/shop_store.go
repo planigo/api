@@ -20,14 +20,14 @@ func NewShopStore(db *sql.DB) *ShopStore {
 func (store *ShopStore) FindShops() ([]entities.Shop, error) {
 	var shops []entities.Shop
 
-	rows, err := store.Query("SELECT * FROM Shop")
+	rows, err := store.Query("SELECT id, slug, name, description, owner_id, category_id FROM Shop")
 	if err != nil {
 		return shops, err
 	}
 
 	for rows.Next() {
 		var shopRow entities.Shop
-		if err := rows.Scan(&shopRow.Id, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
+		if err := rows.Scan(&shopRow.Id, &shopRow.Slug, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
 			return shops, err
 		}
 		shops = append(shops, shopRow)
@@ -42,9 +42,9 @@ func (store *ShopStore) FindShops() ([]entities.Shop, error) {
 func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
 	var shop entities.Shop
 
-	row := store.QueryRow("SELECT * FROM Shop WHERE id = ?;", shopId)
+	row := store.QueryRow("SELECT id, slug, name, description, owner_id, category_id FROM Shop WHERE id = ?;", shopId)
 
-	if err := row.Scan(&shop.Id, &shop.Name, &shop.Description, &shop.OwnerID, &shop.CategoryID); err != nil {
+	if err := row.Scan(&shop.Id, &shop.Slug, &shop.Name, &shop.Description, &shop.OwnerID, &shop.CategoryID); err != nil {
 		return shop, err
 	}
 
@@ -54,9 +54,9 @@ func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
 func (store *ShopStore) AddShop(newShop entities.ShopRequest) (entities.Shop, error) {
 	insertedShop := new(entities.Shop)
 
-	query := "INSERT INTO Shop (name, description, owner_id, category_id) VALUES (?, ?, ?, ?) RETURNING id, name, description, category_id"
+	query := "INSERT INTO Shop (name, description, owner_id, category_id) VALUES (?, ?, ?, ?) RETURNING id, slug, name, description, category_id"
 
-	if err := store.QueryRow(query, newShop.Name, newShop.Description, newShop.OwnerID, newShop.CategoryID).Scan(&insertedShop.Id, &insertedShop.Name, &insertedShop.Description, &insertedShop.CategoryID); err != nil {
+	if err := store.QueryRow(query, newShop.Name, newShop.Description, newShop.OwnerID, newShop.CategoryID).Scan(&insertedShop.Id, &insertedShop.Slug, &insertedShop.Name, &insertedShop.Description, &insertedShop.CategoryID); err != nil {
 		return *insertedShop, err
 	}
 
@@ -85,4 +85,26 @@ func (store *ShopStore) RemoveShop(shopId string) (int, error) {
 	}
 
 	return http.StatusNoContent, nil
+}
+
+func (store *ShopStore) FindShopsByCategory(CategoryId string) ([]entities.Shop, error) {
+	var shops []entities.Shop
+
+	rows, err := store.Query("SELECT id, slug, name, description, owner_id, category_id FROM Shop WHERE category_id = ?;", CategoryId)
+	if err != nil {
+		return shops, err
+	}
+
+	for rows.Next() {
+		var shopRow entities.Shop
+		if err := rows.Scan(&shopRow.Id, &shopRow.Slug, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
+			return shops, err
+		}
+		shops = append(shops, shopRow)
+	}
+
+	if err := rows.Err(); err != nil {
+		return shops, err
+	}
+	return shops, nil
 }

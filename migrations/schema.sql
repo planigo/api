@@ -14,12 +14,14 @@ CREATE TABLE IF NOT EXISTS `User`
 CREATE TABLE IF NOT EXISTS `Category`
 (
     `id`   VARCHAR(36) PRIMARY KEY NOT NULL,
+    `slug` VARCHAR(255) UNIQUE NOT NULL,
     `name` VARCHAR(255)            NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `Shop`
 (
     `id`          VARCHAR(36) PRIMARY KEY NOT NULL,
+    `slug`        VARCHAR(255) NOT NULL,
     `name`        VARCHAR(255)            NOT NULL,
     `description` TEXT,
     `owner_id`    VARCHAR(36),
