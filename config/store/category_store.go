@@ -18,7 +18,7 @@ func newCategoryStore(db *sql.DB) *CategoryStore {
 func (s CategoryStore) GetCategories() ([]entities.Category, error) {
 	var categories []entities.Category
 
-	query := "SELECT id, name FROM Category"
+	query := "SELECT id, name, slug FROM Category"
 
 	rows, err := s.Query(query)
 	if err != nil {
@@ -28,7 +28,7 @@ func (s CategoryStore) GetCategories() ([]entities.Category, error) {
 	for rows.Next() {
 		category := entities.Category{}
 
-		if err := rows.Scan(&category.Id, &category.Name); err != nil {
+		if err := rows.Scan(&category.Id, &category.Name, &category.Slug); err != nil {
 			return categories, err
 		}
 

@@ -6,6 +6,7 @@ type Shop struct {
 	Description string `json:"description"`
 	OwnerID     string `json:"owner_id,omitempty"`
 	CategoryID  string `json:"category_id,omitempty"`
+	Slug        string `json:"slug"`
 }
 
 type ShopRequest struct {
