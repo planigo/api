@@ -86,3 +86,25 @@ func (store *ShopStore) RemoveShop(shopId string) (int, error) {
 
 	return http.StatusNoContent, nil
 }
+
+func (store *ShopStore) FindShopsByCategory(CategoryId string) ([]entities.Shop, error) {
+	var shops []entities.Shop
+
+	rows, err := store.Query("SELECT * FROM Shop WHERE category_id = ?;", CategoryId)
+	if err != nil {
+		return shops, err
+	}
+
+	for rows.Next() {
+		var shopRow entities.Shop
+		if err := rows.Scan(&shopRow.Id, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
+			return shops, err
+		}
+		shops = append(shops, shopRow)
+	}
+
+	if err := rows.Err(); err != nil {
+		return shops, err
+	}
+	return shops, nil
+}

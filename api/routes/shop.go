@@ -16,4 +16,6 @@ func ShopRoutes(app fiber.Router, handler *shop.Handler) {
 	router.Patch("/:shopId", handler.EditShop())
 
 	router.Delete("/:shopId", handler.DeleteShop())
+
+	router.Get("/category/:categoryId", handler.GetShopsByCategory())
 }
