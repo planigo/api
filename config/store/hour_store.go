@@ -38,6 +38,29 @@ func (s HourStore) GetHours() ([]entities.Hour, error) {
 	return hours, nil
 }
 
+func (s HourStore) FindHoursByShopId(shopId string) ([]entities.Hour, error) {
+	var hours []entities.Hour
+
+	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ?;"
+
+	rows, err := s.Query(query, shopId)
+	if err != nil {
+		return hours, err
+	}
+
+	for rows.Next() {
+		hour := entities.Hour{}
+
+		if err := rows.Scan(&hour.Id, &hour.Start, &hour.End, &hour.Day, &hour.ShopID); err != nil {
+			return hours, err
+		}
+
+		hours = append(hours, hour)
+	}
+
+	return hours, nil
+}
+
 func (s HourStore) CreateHour(hour entities.Hour) (entities.Hour, error) {
 	insertedHour := entities.Hour{}
 
