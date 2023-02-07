@@ -4,6 +4,15 @@ start:
 dev:
 	air
 
+install-deps:
+	brew install golangci-lint
+
+lint:
+	golangci-lint run
+
+config:
+	git config core.hooksPath .githooks
+
 deps:
 	go install github.com/cosmtrek/air@latest && \
   	go install gotest.tools/gotestsum
