@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "[pre-commit hook] Linting code..."
+make lint
