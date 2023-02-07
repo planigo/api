@@ -9,3 +9,6 @@ install-deps:
 
 lint:
 	golangci-lint run
+
+config:
+	git config core.hooksPath .githooks
