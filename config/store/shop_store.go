@@ -87,10 +87,10 @@ func (store *ShopStore) RemoveShop(shopId string) (int, error) {
 	return http.StatusNoContent, nil
 }
 
-func (store *ShopStore) FindShopsByCategory(CategoryId string) ([]entities.Shop, error) {
+func (store *ShopStore) FindShopsByCategorySlug(categorySlug string) ([]entities.Shop, error) {
 	var shops []entities.Shop
 
-	rows, err := store.Query("SELECT id, slug, name, description, owner_id, category_id FROM Shop WHERE category_id = ?;", CategoryId)
+	rows, err := store.Query("SELECT s.id, s.slug, s.name, s.description, s.owner_id, s.category_id FROM Shop s LEFT JOIN Category ON Category.id = s.category_id WHERE Category.slug = ?;", categorySlug)
 	if err != nil {
 		return shops, err
 	}
