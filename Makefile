@@ -5,6 +5,7 @@ dev:
 	air
 
 install-deps:
+	go install github.com/cosmtrek/air@latest && \
 	brew install golangci-lint
 
 lint:
