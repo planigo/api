@@ -95,11 +95,11 @@ func (h Handler) DeleteShop() fiber.Handler {
 	}
 }
 
-func (h Handler) GetShopsByCategory() fiber.Handler {
+func (h Handler) GetShopsByCategorySlug() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		categoryId := ctx.Params("categoryId")
+		categorySlug := ctx.Params("categorySlug")
 
-		shops, err := h.ShopStore.FindShopsByCategory(categoryId)
+		shops, err := h.ShopStore.FindShopsByCategorySlug(categorySlug)
 		if err != nil {
 			log.Fatal(err)
 		}
