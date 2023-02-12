@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"database/sql"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"planigo/config/mail"
 	storeManager "planigo/config/store"
 	"planigo/pkg/auth"
@@ -13,6 +12,8 @@ import (
 	"planigo/pkg/shop"
 	"planigo/pkg/user"
 	"time"
+
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type Services struct {
@@ -22,7 +23,7 @@ type Services struct {
 	HourHandler        *hour.Handler
 	ServiceHandler     *service.ServiceHandler
 	CategoryHandler    *category.Handler
-	ReservationHandler *reservation.Handler
+  ReservationHandler *reservation.Handler
 }
 
 func NewServices(db *sql.DB) *Services {
@@ -38,6 +39,6 @@ func NewServices(db *sql.DB) *Services {
 		HourHandler:        &hour.Handler{Store: store, Session: session},
 		ServiceHandler:     &service.ServiceHandler{Store: store, Session: session},
 		CategoryHandler:    &category.Handler{Store: store},
-		ReservationHandler: &reservation.Handler{Store: store, Session: session},
-	}
+    ReservationHandler: &reservation.Handler{Store: store, Session: session},
+  }
 }
