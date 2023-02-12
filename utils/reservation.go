@@ -1,32 +1,56 @@
 package utils
 
 import (
+	"fmt"
 	"planigo/common"
+	"planigo/pkg/entities"
 	"time"
 )
 
-func CreateEmptySlotsMapByShopHours(startHour string, endHour string, days int) []common.DaySlot {
+// CreateEmptySlotsWithShopHours
+// startHour is a list of hours for each day of the week
+// nbOfDays is the number of days to display in the calendar (today not included)
+func CreateEmptySlotsWithShopHours(shopHoursByWeekDay []entities.Hour, nbOfDaysToDisplayExcludeToday int) []common.DaySlot {
 	var emptySlotsMap []common.DaySlot
 
-	for _, day := range NextXDays(days) {
+	var shopHoursByWeekDayMap = make(map[int]entities.Hour)
+	for _, hour := range shopHoursByWeekDay {
+		shopHoursByWeekDayMap[hour.Day] = hour
+	}
+
+	for _, day := range GetNextDaysDate(nbOfDaysToDisplayExcludeToday) {
 		var slot common.DaySlot
-		slot = common.DaySlot{
-			Date:  day.Format("2006-01-02"),
-			Slots: ComputeEmptySlots(startHour, endHour),
+		dayKey := getDayNumberWithSundayAsLast(int(day.Weekday()))
+		fmt.Println("dayKey : ", dayKey)
+		slot.Date = day.Format("2006-01-02")
+		if shopHour, ok := shopHoursByWeekDayMap[dayKey]; ok {
+			slot.Slots = ComputeEmptySlots(shopHour.Start, shopHour.End)
+		} else {
+			slot.Slots = []common.Slot{}
 		}
+
 		emptySlotsMap = append(emptySlotsMap, slot)
 	}
 
 	return emptySlotsMap
 }
 
-func NextXDays(x int) []time.Time {
+func GetNextDaysDate(x int) []time.Time {
 	var dates []time.Time
 	for i := 0; i <= x; i++ {
 		date := time.Now().AddDate(0, 0, i)
 		dates = append(dates, date)
 	}
 	return dates
+}
+
+// In the database, sunday is the last day of the week (7)
+// In go, sunday is the first day of the week (0)
+func getDayNumberWithSundayAsLast(day int) int {
+	if day == 0 {
+		return 7
+	}
+	return day
 }
 
 func ComputeEmptySlots(startHour string, endHour string) []common.Slot {
@@ -76,7 +100,10 @@ func MakeReservationMap(
 
 	for _, reservation := range reservations {
 		reservationDate, _ := time.Parse("2006-01-02 15:04:05", reservation.Start)
-		key := getReservationKey(reservationDate.Format("2006-01-02"), reservationDate.Format("15:04:05"))
+		key := getReservationKey(
+			reservationDate.Format("2006-01-02"),
+			reservationDate.Format("15:04:05"),
+		)
 		reservationMap[key] = reservation
 	}
 	return reservationMap

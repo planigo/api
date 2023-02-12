@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"planigo/config/store"
 	"planigo/pkg/entities"
-	"strconv"
 )
 
 type Handler struct {
@@ -47,7 +46,7 @@ func (h Handler) CreateHour() fiber.Handler {
 
 func (h Handler) GetHourById() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		id, _ := strconv.Atoi(c.Params("id"))
+		id := c.Params("id")
 
 		hours, err := h.HourStore.GetHourById(id)
 		if err != nil {

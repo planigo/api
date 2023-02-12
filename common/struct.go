@@ -20,4 +20,5 @@ type DetailedReservation struct {
 	Duration      string `json:"duration"`
 	Start         string `json:"start"`
 	End           string `json:"end"`
+	UserId        string `json:"userId"`
 }

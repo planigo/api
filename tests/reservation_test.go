@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"planigo/common"
+	"planigo/pkg/entities"
 	"planigo/utils"
 	"testing"
 	"time"
@@ -34,9 +35,9 @@ func TestComputeEmptySlots(t *testing.T) {
 	}
 }
 
-func TestNextXDays(t *testing.T) {
+func TestGetNextDaysDate(t *testing.T) {
 
-	dates := utils.NextXDays(2)
+	dates := utils.GetNextDaysDate(2)
 
 	expectedDates := []string{
 		dateNow.Format("2006-01-02"),
@@ -48,7 +49,7 @@ func TestNextXDays(t *testing.T) {
 		t.Errorf("got %+v, want %+v", dates, expectedDates)
 	}
 
-	dates = utils.NextXDays(3)
+	dates = utils.GetNextDaysDate(3)
 
 	expectedDates = append(expectedDates, dateNow.AddDate(0, 0, 3).Format("2006-01-02"))
 
@@ -58,62 +59,32 @@ func TestNextXDays(t *testing.T) {
 }
 
 func TestCreateEmptySlotsMapByShopHours(t *testing.T) {
-
-	emptySlotsMap := utils.CreateEmptySlotsMapByShopHours("10:00:00", "11:00:00", 2)
-
-	expectedEmptySlotsMap := []common.DaySlot{
-		{
-			Date: time.Now().Format("2006-01-02"),
-			Slots: []common.Slot{
-				{
-					ReservationId: "",
-					IsAvailable:   true,
-					Start:         "10:00:00",
-					End:           "11:00:00",
-					Duration:      60,
-				},
-			},
-		},
-		{
-			Date: time.Now().AddDate(0, 0, 1).Format("2006-01-02"),
-			Slots: []common.Slot{
-				{
-					ReservationId: "",
-					IsAvailable:   true,
-					Start:         "10:00:00",
-					End:           "11:00:00",
-					Duration:      60,
-				},
-			},
-		},
-		{
-			Date: time.Now().AddDate(0, 0, 2).Format("2006-01-02"),
-			Slots: []common.Slot{
-				{
-					ReservationId: "",
-					IsAvailable:   true,
-					Start:         "10:00:00",
-					End:           "11:00:00",
-					Duration:      60,
-				},
-			},
-		},
+	shopHoursByWeekDay := []entities.Hour{
+		{Id: "1", Start: "09:00:00", End: "18:00:00", Day: 1, ShopID: "1"},
+		{Id: "2", Start: "09:00:00", End: "18:00:00", Day: 2, ShopID: "1"},
+		{Id: "3", Start: "09:00:00", End: "18:00:00", Day: 3, ShopID: "1"},
+		{Id: "4", Start: "09:00:00", End: "18:00:00", Day: 4, ShopID: "1"},
+		{Id: "5", Start: "09:00:00", End: "18:00:00", Day: 5, ShopID: "1"},
+		{Id: "6", Start: "09:00:00", End: "18:00:00", Day: 6, ShopID: "1"},
+		{Id: "7", Start: "09:00:00", End: "18:00:00", Day: 7, ShopID: "1"},
 	}
 
-	if len(emptySlotsMap) != 3 {
-		t.Errorf("len: got %d, want %d", len(emptySlotsMap), 3)
+	emptySlotsMap := utils.CreateEmptySlotsWithShopHours(shopHoursByWeekDay, 6)
+
+	if len(emptySlotsMap) != 7 {
+		t.Errorf("emptySlotsMap : got %d, want %d", len(emptySlotsMap), 7)
 	}
 
-	if emptySlotsMap[0].Date != expectedEmptySlotsMap[0].Date {
-		t.Errorf("date 0: got %s, want %s", emptySlotsMap[0].Date, expectedEmptySlotsMap[0].Date)
+	if emptySlotsMap[0].Date != time.Now().Format("2006-01-02") {
+		t.Errorf("First slot date : got %v, want %v", len(emptySlotsMap[0].Date), time.Now().Format("2006-01-02"))
 	}
 
-	if emptySlotsMap[1].Date != expectedEmptySlotsMap[1].Date {
-		t.Errorf("date 1: got %s, want %s", emptySlotsMap[1].Date, expectedEmptySlotsMap[1].Date)
+	if len(emptySlotsMap[0].Slots) != 9 {
+		t.Errorf("emptySlotsMap[0].Slots : got %d, want %d", len(emptySlotsMap[0].Slots), 9)
 	}
 
-	if emptySlotsMap[2].Date != expectedEmptySlotsMap[2].Date {
-		t.Errorf("date 2: got %s, want %s", emptySlotsMap[2].Date, expectedEmptySlotsMap[2].Date)
+	if emptySlotsMap[1].Date != tomorrow.Format("2006-01-02") {
+		t.Errorf("First slot date : got %v, want %v", len(emptySlotsMap[1].Date), tomorrow.Format("2006-01-02"))
 	}
 }
 
@@ -123,7 +94,7 @@ func TestMakeReservationMap(t *testing.T) {
 		{
 			ReservationId: "1",
 			ServiceId:     "1",
-			ServiceName:   "coiffure homme",
+			ServiceName:   "Coiffure Homme",
 			Start:         tomorrow.Format("2006-01-02 15:04:05"),
 		},
 	}
@@ -142,36 +113,30 @@ func TestMakeReservationMap(t *testing.T) {
 }
 
 func TestFillEmptySlotsWithReservationByDate(t *testing.T) {
-	emptySlots := utils.CreateEmptySlotsMapByShopHours("11:00:00", "14:00:00", 2)
+	shopHoursByWeekDay := []entities.Hour{
+		{Id: "1", Start: "11:00:00", End: "18:00:00", Day: 1, ShopID: "1"},
+		{Id: "2", Start: "11:00:00", End: "18:00:00", Day: 2, ShopID: "1"},
+		{Id: "3", Start: "11:00:00", End: "18:00:00", Day: 3, ShopID: "1"},
+		{Id: "4", Start: "11:00:00", End: "18:00:00", Day: 4, ShopID: "1"},
+		{Id: "5", Start: "11:00:00", End: "18:00:00", Day: 5, ShopID: "1"},
+		{Id: "6", Start: "11:00:00", End: "18:00:00", Day: 6, ShopID: "1"},
+		{Id: "7", Start: "11:00:00", End: "18:00:00", Day: 7, ShopID: "1"},
+	}
+
+	emptySlots := utils.CreateEmptySlotsWithShopHours(shopHoursByWeekDay, 6)
 
 	daySlots := utils.FillEmptySlotsWithReservationByDate(emptySlots, []common.DetailedReservation{
-		{
-			ReservationId: "1",
-			ServiceId:     "1",
-			ServiceName:   "coiffure homme",
-			Start:         tomorrow.Format("2006-01-02 15:04:05"),
-		},
-		{
-			ReservationId: "1",
-			ServiceId:     "1",
-			ServiceName:   "coiffure homme",
-			Start:         tomorrow.AddDate(0, 0, 1).Format("2006-01-02 15:04:05"),
-		},
+		{ReservationId: "1", ServiceId: "1", ServiceName: "coiffure homme", Start: tomorrow.Format("2006-01-02 15:04:05")},
 	})
+
+	fmt.Println("daySlots", daySlots)
 
 	if daySlots[1].Slots[0].IsAvailable {
 		t.Errorf("got %t, want %t", daySlots[1].Slots[0].IsAvailable, false)
 	}
 
-	if !daySlots[1].Slots[1].IsAvailable {
-		t.Errorf("got %t, want %t", daySlots[1].Slots[0].IsAvailable, true)
+	if daySlots[1].Slots[0].ReservationId != "1" {
+		t.Errorf("got %s, want %s", daySlots[1].Slots[0].ReservationId, "1")
 	}
 
-	if daySlots[2].Slots[0].IsAvailable {
-		t.Errorf("got %t, want %t", daySlots[1].Slots[0].IsAvailable, false)
-	}
-
-	if !daySlots[2].Slots[1].IsAvailable {
-		t.Errorf("got %t, want %t", daySlots[1].Slots[0].IsAvailable, true)
-	}
 }

@@ -9,4 +9,4 @@ deps:
   	go install gotest.tools/gotestsum
 
 test:
-	gotestsum --format short-verbose -- -v ./tests
+	gotestsum --format testname ./tests

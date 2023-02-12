@@ -1,13 +1,13 @@
 package reservation
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/config/store"
 	"planigo/utils"
+	"strconv"
 )
 
 type Handler struct {
@@ -19,38 +19,33 @@ func New(store *store.Store, session *session.Store) *Handler {
 	return &Handler{store, session}
 }
 
-func (h Handler) GetReservationByShopId() fiber.Handler {
+func (h Handler) GetNextSlotsByDays() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 
 		shopId := ctx.Params("shopId")
-
-		println(shopId)
+		nbOfDays, _ := strconv.Atoi(ctx.Query("until", "7"))
 
 		bookedReservations, err := h.ReservationStore.GetReservationsByShopId(shopId)
 		if err != nil {
-			fmt.Println(err.Error())
 			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"statusCode": fiber.StatusInternalServerError,
 				"message":    err.Error(),
 			})
 		}
 
-		//shopHoursByWeekDay, err = h.HourStore.GetHoursByShopId()
-		//if err != nil {
-		//	fmt.Println(err.Error())
-		//	return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-		//		"statusCode": fiber.StatusInternalServerError,
-		//		"message":    err.Error(),
-		//	})
-		//}
+		shopHoursByWeekDay, err := h.HourStore.GetHourByShopId(shopId)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"statusCode": fiber.ErrNotFound,
+				"message":    err.Error(),
+			})
+		}
 
-		emptySlots := utils.CreateEmptySlotsMapByShopHours("09:00:00", "18:00:00", 6)
+		emptySlots := utils.CreateEmptySlotsWithShopHours(shopHoursByWeekDay, nbOfDays)
 
 		return ctx.
 			Status(http.StatusOK).
-			JSON(&fiber.Map{
-				"data": utils.FillEmptySlotsWithReservationByDate(emptySlots, bookedReservations),
-			})
+			JSON(utils.FillEmptySlotsWithReservationByDate(emptySlots, bookedReservations))
 	}
 }
 
@@ -81,4 +76,39 @@ func (h Handler) BookReservationByShopId() fiber.Handler {
 		return ctx.Status(http.StatusCreated).JSON(reservation)
 	}
 
+}
+
+func (h Handler) CancelReservation() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		reservationId := c.Params("id")
+		userId := c.Locals("userId")
+
+		reservation, err := h.ReservationStore.GetReservationById(reservationId)
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"statusCode": fiber.StatusNotFound,
+				"message":    err.Error(),
+			})
+		}
+
+		// only the user who booked the reservation can cancel it > move to isOwner() middleware ?
+		if reservation.UserId != userId {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"statusCode": fiber.StatusUnauthorized,
+				"message":    "You are not allowed to cancel this reservation",
+			})
+		}
+
+		if err := h.ReservationStore.CancelReservation(reservationId); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"statusCode": fiber.StatusInternalServerError,
+				"message":    err.Error(),
+			})
+		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"statusCode": http.StatusOK,
+			"message":    "Reservation canceled",
+		})
+	}
 }

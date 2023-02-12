@@ -73,7 +73,7 @@ func (r ReservationStore) InsertReservation(serviceId string, start string, user
 
 func (r ReservationStore) GetReservationById(id string) (common.DetailedReservation, error) {
 	var reservation common.DetailedReservation
-	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.id = ?;"
+	query := "SELECT r.id, s.id, r.user_id, s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.id = ?;"
 	err := r.
 		QueryRow(query, id).
 		Scan(
@@ -82,6 +82,7 @@ func (r ReservationStore) GetReservationById(id string) (common.DetailedReservat
 			&reservation.ServiceName,
 			&reservation.Duration,
 			&reservation.Start,
+			&reservation.UserId,
 		)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -101,7 +102,7 @@ func (r ReservationStore) BookReservation(
 	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ?;"
 	rows, err := r.Query(query, shopId, start)
 	if rows.Next() {
-		return serviceReservation, errors.New("Reservation already booked")
+		return serviceReservation, errors.New("The slot is no longer available")
 	}
 	if err != nil {
 		fmt.Println("ça se chie dessus : :", err.Error())
@@ -116,4 +117,12 @@ func (r ReservationStore) BookReservation(
 	insertedReservation, _ := r.GetReservationById(uuid)
 
 	return insertedReservation, nil
+}
+
+func (r ReservationStore) CancelReservation(id string) error {
+	_, err := r.Exec("UPDATE Reservation SET is_canceled = true WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

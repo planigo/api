@@ -8,11 +8,9 @@ import (
 func ReservationRoutes(app fiber.Router, handler *reservation.Handler) {
 	r := app.Group("/reservation")
 
-	r.Get("/:shopId", handler.GetReservationByShopId())
+	r.Get("slots/:shopId", handler.GetNextSlotsByDays())
 
 	r.Post("/", handler.BookReservationByShopId())
 
-	//r.Get("/:id", handler.GetHourById())
-	//r.Delete("/:id", handler.DeleteHour())
-	//r.Put("/:id", handler.UpdateHour())
+	r.Post("/cancel/:id", handler.CancelReservation()) // can cancel only if the reservation is not started yet and it's owned by the user
 }

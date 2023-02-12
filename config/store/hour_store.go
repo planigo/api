@@ -52,7 +52,7 @@ func (s HourStore) CreateHour(hour entities.Hour) (entities.Hour, error) {
 	return insertedHour, nil
 }
 
-func (s HourStore) GetHourById(shopId int) (entities.Hour, error) {
+func (s HourStore) GetHourById(shopId string) (entities.Hour, error) {
 	hour := entities.Hour{}
 
 	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ?"
@@ -64,6 +64,28 @@ func (s HourStore) GetHourById(shopId int) (entities.Hour, error) {
 	}
 
 	return hour, nil
+}
+
+func (s HourStore) GetHourByShopId(shopId string) ([]entities.Hour, error) {
+	var hours []entities.Hour
+
+	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ?"
+
+	rows, err := s.Query(query, shopId)
+	if err != nil {
+		return hours, err
+	}
+
+	for rows.Next() {
+		hour := entities.Hour{}
+		if err := rows.Scan(&hour.Id, &hour.Start, &hour.End, &hour.Day, &hour.ShopID); err != nil {
+			return hours, err
+		}
+
+		hours = append(hours, hour)
+	}
+
+	return hours, nil
 }
 
 func (s HourStore) DeleteHour(id string) error {
