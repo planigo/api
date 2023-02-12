@@ -1,10 +1,13 @@
 package reservation
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
+	"planigo/common"
+	"planigo/config/mail"
 	"planigo/config/store"
 	"planigo/utils"
 	"strconv"
@@ -13,10 +16,11 @@ import (
 type Handler struct {
 	*store.Store
 	Session *session.Store
+	*mail.Mailer
 }
 
-func New(store *store.Store, session *session.Store) *Handler {
-	return &Handler{store, session}
+func New(store *store.Store, session *session.Store, mailer *mail.Mailer) *Handler {
+	return &Handler{store, session, mailer}
 }
 
 func (h Handler) GetNextSlotsByDays() fiber.Handler {
@@ -73,6 +77,16 @@ func (h Handler) BookReservationByShopId() fiber.Handler {
 			})
 		}
 
+		user, err := h.UserStore.FindUserById(reservation.UserId)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		cancellationEmail := mail.Content{To: user.Email, Subject: "Reservation canceled", Body: getEmailContentForCancelation(reservation)}
+		if err := h.Mailer.Send(cancellationEmail); err != nil {
+			log.Println(err.Error())
+		}
+
 		return ctx.Status(http.StatusCreated).JSON(reservation)
 	}
 
@@ -111,4 +125,8 @@ func (h Handler) CancelReservation() fiber.Handler {
 			"message":    "Reservation canceled",
 		})
 	}
+}
+
+func getEmailContentForCancelation(reservation common.DetailedReservation) string {
+	return fmt.Sprintf("Your reservation for %s at %s has been canceled", reservation.ServiceName, reservation.Start)
 }

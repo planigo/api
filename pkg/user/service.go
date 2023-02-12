@@ -51,7 +51,9 @@ func (r Handler) RegisterUser() fiber.Handler {
 
 		userPayload.Id = uuid
 
-		sendValidationEmail(r.Mailer, userPayload)
+		if err := sendValidationEmail(r.Mailer, userPayload); err != nil {
+			return err
+		}
 
 		return ctx.SendStatus(http.StatusCreated)
 	}
@@ -80,12 +82,16 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func sendValidationEmail(mailer *mail.Mailer, user *entities.User) {
+func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
+	validationToken := utils.GenerateJWT(&utils.TokenPayload{ID: user.Id})
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",
-		Body:    "Bienvenue sur Planigo, votre application de prise de reservation en ligne. Merci de cliquer sur le lien suivant pour valider votre compte: http://localhost:3000/validate?token=" + utils.GenerateJWT(&utils.TokenPayload{ID: user.Id}),
+		Body:    "Bienvenue sur Planigo, votre application de prise de reservation en ligne. Merci de cliquer sur le lien suivant pour valider votre compte: http://localhost:3000/validate?token=" + validationToken,
 	}
 
-	mailer.Send(emailContent)
+	if err := mailer.Send(emailContent); err != nil {
+		return err
+	}
+	return nil
 }

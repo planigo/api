@@ -23,7 +23,7 @@ type Services struct {
 	HourHandler        *hour.Handler
 	ServiceHandler     *service.ServiceHandler
 	CategoryHandler    *category.Handler
-  ReservationHandler *reservation.Handler
+	ReservationHandler *reservation.Handler
 }
 
 func NewServices(db *sql.DB) *Services {
@@ -39,6 +39,6 @@ func NewServices(db *sql.DB) *Services {
 		HourHandler:        &hour.Handler{Store: store, Session: session},
 		ServiceHandler:     &service.ServiceHandler{Store: store, Session: session},
 		CategoryHandler:    &category.Handler{Store: store},
-    ReservationHandler: &reservation.Handler{Store: store, Session: session},
-  }
+		ReservationHandler: &reservation.Handler{Store: store, Session: session, Mailer: mailer},
+	}
 }
