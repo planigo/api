@@ -7,5 +7,5 @@ type Reservation struct {
 	Start      time.Time `json:"start" `
 	ServiceID  string    `json:"service_id" `
 	UserID     string    `json:"user_id" `
-	IsCanceled bool      `json:"is_canceled" `
+	IsCanceled bool      `json:"is_cancelled" `
 }

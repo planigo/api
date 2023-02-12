@@ -14,14 +14,14 @@ CREATE TABLE IF NOT EXISTS `User`
 CREATE TABLE IF NOT EXISTS `Category`
 (
     `id`   VARCHAR(36) PRIMARY KEY NOT NULL,
-    `slug` VARCHAR(255) UNIQUE NOT NULL,
+    `slug` VARCHAR(255) UNIQUE     NOT NULL,
     `name` VARCHAR(255)            NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `Shop`
 (
     `id`          VARCHAR(36) PRIMARY KEY NOT NULL,
-    `slug`        VARCHAR(255) NOT NULL,
+    `slug`        VARCHAR(255)            NOT NULL,
     `name`        VARCHAR(255)            NOT NULL,
     `description` TEXT,
     `owner_id`    VARCHAR(36),
@@ -46,10 +46,11 @@ CREATE TABLE IF NOT EXISTS `Service`
 
 CREATE TABLE IF NOT EXISTS `Reservation`
 (
-    `id`         VARCHAR(36) PRIMARY KEY NOT NULL,
-    `start`      datetime,
-    `service_id` VARCHAR(36),
-    `user_id`    VARCHAR(36),
+    `id`           VARCHAR(36) PRIMARY KEY NOT NULL,
+    `start`        datetime,
+    `service_id`   VARCHAR(36),
+    `user_id`      VARCHAR(36),
+    `is_cancelled` BOOLEAN DEFAULT FALSE,
     CONSTRAINT `fk_reservation_service`
         FOREIGN KEY (`service_id`) REFERENCES `Service` (`id`),
     CONSTRAINT `fk_reservation_user`

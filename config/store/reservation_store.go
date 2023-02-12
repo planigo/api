@@ -120,7 +120,7 @@ func (r ReservationStore) BookReservation(
 }
 
 func (r ReservationStore) CancelReservation(id string) error {
-	_, err := r.Exec("UPDATE Reservation SET is_canceled = true WHERE id = ?", id)
+	_, err := r.Exec("UPDATE Reservation SET is_cancelled = true WHERE id = ?", id)
 	if err != nil {
 		return err
 	}
