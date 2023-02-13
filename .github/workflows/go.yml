@@ -27,7 +27,7 @@ jobs:
               go-version: 1.19
               cache: true
         - name: Install dependencies
-          run: go get . && make deps
+          run: go install gotest.tools/gotestsum && go get .
         - name: Test
           run: make test
 
