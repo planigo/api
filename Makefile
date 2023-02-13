@@ -13,3 +13,10 @@ lint:
 
 config:
 	git config core.hooksPath .githooks
+
+deps:
+	go install github.com/cosmtrek/air@latest && \
+  	go install gotest.tools/gotestsum
+
+test:
+	gotestsum --format testname ./tests

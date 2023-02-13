@@ -43,6 +43,7 @@ func Start() {
 	routes.HourRoutes(api, handlers.HourHandler)
 	routes.ServicesRoutes(api, handlers.ServiceHandler)
 	routes.CategoryRoutes(api, handlers.CategoryHandler)
+	routes.ReservationRoutes(api, handlers.ReservationHandler)
 
 	// Endpoint for 'Not Found'.
 	app.All("*", func(c *fiber.Ctx) error {
