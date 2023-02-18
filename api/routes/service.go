@@ -10,7 +10,7 @@ func ServicesRoutes(app fiber.Router, handler *service.ServiceHandler) {
 	router := app.Group("/services")
 
 	router.Get("/", handler.GetServices())
-	router.Get("/:shopId", handler.GetServicesByShopId())
+	router.Get("/shop/:shopId", handler.GetServicesByShopId())
 	router.Get("/:serviceId", handler.GetServiceById())
 
 	router.Post("/", handler.CreateService())
