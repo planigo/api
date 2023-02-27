@@ -2,8 +2,6 @@ package reservation
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/common"
@@ -11,6 +9,9 @@ import (
 	"planigo/config/store"
 	"planigo/utils"
 	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type Handler struct {
@@ -50,6 +51,23 @@ func (h Handler) GetNextSlotsByDays() fiber.Handler {
 		return ctx.
 			Status(http.StatusOK).
 			JSON(utils.FillEmptySlotsWithReservationByDate(emptySlots, bookedReservations))
+	}
+}
+
+func (h Handler) GetSlotsBookedByUser() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		userId := ctx.Params("userId")
+		fmt.Println(userId)
+
+		bookedReservation, err := h.ReservationStore.GetSlotsBookedByUserId(userId)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"statusCode": fiber.ErrInternalServerError,
+				"message":    err.Error(),
+			})
+		}
+
+		return ctx.Status(http.StatusOK).JSON(bookedReservation)
 	}
 }
 

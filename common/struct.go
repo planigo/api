@@ -22,3 +22,12 @@ type DetailedReservation struct {
 	End           string `json:"end"`
 	UserId        string `json:"userId"`
 }
+
+type BookedReservation struct {
+	ReservationId string `json:"reservationId"`
+	ShopName      string `json:"shopName"`
+	ServiceName   string `json:"serviceName"`
+	Duration      int32 `json:"duration"`
+	Price         float32 `json:"price"`
+	Start         string `json:"start"`
+}

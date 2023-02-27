@@ -35,11 +35,8 @@ func (r ReservationStore) GetReservationsByShopId(id string) ([]common.DetailedR
 	for rows.Next() {
 		reservation := common.DetailedReservation{}
 		startDate, _ := time.Parse("2006-01-02 15:04:05", reservation.Start)
-		fmt.Println(startDate)
 		duration, _ := strconv.Atoi(reservation.Duration)
-		fmt.Println(duration)
 		reservation.End = startDate.Add(time.Duration(duration) * time.Minute).String()
-		fmt.Println(reservation.End)
 		err := rows.
 			Scan(
 				&reservation.ReservationId,
@@ -125,4 +122,33 @@ func (r ReservationStore) CancelReservation(id string) error {
 		return err
 	}
 	return nil
+}
+
+func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.BookedReservation, error) {
+	var reservationBooked []common.BookedReservation
+	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id  = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
+	rows, err := r.Query(query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var reservation common.BookedReservation
+		err := rows.
+			Scan(
+				&reservation.ReservationId,
+				&reservation.ShopName,
+				&reservation.ServiceName,
+				&reservation.Price,
+				&reservation.Duration,
+				&reservation.Start,
+			)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+		reservationBooked = append(reservationBooked, reservation)
+	}
+
+	return reservationBooked, nil
 }
