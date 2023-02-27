@@ -20,7 +20,7 @@ func CreateEmptySlotsWithShopHours(shopHoursByWeekDay []entities.Hour, nbOfDaysT
 
 	for _, day := range GetNextDaysDate(nbOfDaysToDisplayExcludeToday) {
 		var slot common.DaySlot
-		dayKey := getDayNumberWithSundayAsLast(int(day.Weekday()))
+		dayKey := GetDayNumberWithSundayAsLast(int(day.Weekday()))
 		fmt.Println("dayKey : ", dayKey)
 		slot.Date = day.Format("2006-01-02")
 		if shopHour, ok := shopHoursByWeekDayMap[dayKey]; ok {
@@ -46,7 +46,7 @@ func GetNextDaysDate(x int) []time.Time {
 
 // In the database, sunday is the last day of the week (7)
 // In go, sunday is the first day of the week (0)
-func getDayNumberWithSundayAsLast(day int) int {
+func GetDayNumberWithSundayAsLast(day int) int {
 	if day == 0 {
 		return 7
 	}

@@ -111,6 +111,18 @@ func (s HourStore) GetHourByShopId(shopId string) ([]entities.Hour, error) {
 	return hours, nil
 }
 
+func (s HourStore) GetHourByShopIdAndDay(shopId string, weekDay int) (entities.Hour, error) {
+	var hour entities.Hour
+
+	if err := s.
+		QueryRow("SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ? AND day = ?", shopId, weekDay).
+		Scan(&hour.Id, &hour.Start, &hour.End, &hour.Day, &hour.ShopID); err != nil {
+		return hour, err
+	}
+
+	return hour, nil
+}
+
 func (s HourStore) DeleteHour(id string) error {
 	query := "DELETE FROM Hour WHERE id = ?"
 

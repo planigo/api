@@ -11,6 +11,7 @@ import (
 	"planigo/config/store"
 	"planigo/utils"
 	"strconv"
+	"time"
 )
 
 type Handler struct {
@@ -54,18 +55,34 @@ func (h Handler) GetNextSlotsByDays() fiber.Handler {
 }
 
 func (h Handler) BookReservationByShopId() fiber.Handler {
+	body := struct {
+		ServiceId string `json:"serviceId"`
+		ShopId    string `json:"shopId"`
+		Start     string `json:"start"`
+		UserId    string `json:"userId"`
+	}{}
 	return func(ctx *fiber.Ctx) error {
-		body := struct {
-			ServiceId string `json:"serviceId"`
-			ShopId    string `json:"shopId"`
-			Start     string `json:"start"`
-			UserId    string `json:"userId"`
-		}{}
 		if err := ctx.BodyParser(&body); err != nil {
 			log.Println(err.Error())
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"statusCode": fiber.StatusBadRequest,
 				"message":    err.Error(),
+			})
+		}
+
+		reservationAt, err := time.Parse("2006-01-02 15:04:05", body.Start)
+		shopHourForWantedDay, err := h.HourStore.GetHourByShopIdAndDay(body.ShopId, utils.GetDayNumberWithSundayAsLast(int(reservationAt.Weekday())))
+		if err != nil {
+			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"statusCode": fiber.StatusNotFound,
+				"message":    err.Error(),
+			})
+		}
+
+		if !utils.IsReservationDuringOpeningHours(body.Start, shopHourForWantedDay.Start, shopHourForWantedDay.End, 60) {
+			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"statusCode": fiber.StatusNotFound,
+				"message":    fmt.Sprintf("The shop is closed at %s", reservationAt.Format("15:04")),
 			})
 		}
 
@@ -82,8 +99,12 @@ func (h Handler) BookReservationByShopId() fiber.Handler {
 			log.Println(err.Error())
 		}
 
-		cancellationEmail := mail.Content{To: user.Email, Subject: "Reservation canceled", Body: getEmailContentForCancelation(reservation)}
-		if err := h.Mailer.Send(cancellationEmail); err != nil {
+		reservationBookedEmail := mail.Content{
+			To:      user.Email,
+			Subject: "Reservation booked",
+			Body:    getEmailContentForBookedReservation(reservation),
+		}
+		if err := h.Mailer.Send(reservationBookedEmail); err != nil {
 			log.Println(err.Error())
 		}
 
@@ -125,6 +146,10 @@ func (h Handler) CancelReservation() fiber.Handler {
 			"message":    "Reservation canceled",
 		})
 	}
+}
+
+func getEmailContentForBookedReservation(reservation common.DetailedReservation) string {
+	return fmt.Sprintf("Your reservation for %s at %s has been booked", reservation.ServiceName, reservation.Start)
 }
 
 func getEmailContentForCancelation(reservation common.DetailedReservation) string {
