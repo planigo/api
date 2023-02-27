@@ -89,7 +89,6 @@ func (h Handler) BookReservationByShopId() fiber.Handler {
 
 		return ctx.Status(http.StatusCreated).JSON(reservation)
 	}
-
 }
 
 func (h Handler) CancelReservation() fiber.Handler {
