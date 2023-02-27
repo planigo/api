@@ -80,8 +80,8 @@ func (h Handler) BookReservationByShopId() fiber.Handler {
 		}
 
 		if !utils.IsReservationDuringOpeningHours(body.Start, shopHourForWantedDay.Start, shopHourForWantedDay.End, 60) {
-			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"statusCode": fiber.StatusNotFound,
+			return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"statusCode": fiber.StatusForbidden,
 				"message":    fmt.Sprintf("The shop is closed at %s", reservationAt.Format("15:04")),
 			})
 		}
