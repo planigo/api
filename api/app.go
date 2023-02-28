@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"os"
 	"planigo/api/routes"
 	"planigo/config/database"
 	"planigo/pkg"
@@ -14,6 +15,10 @@ import (
 )
 
 func Start() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -52,5 +57,5 @@ func Start() {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{"status": "fail", "message": errorMessage})
 	})
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(":" + port))
 }
