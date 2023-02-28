@@ -68,7 +68,19 @@ func (sh ServiceHandler) GetServiceById() fiber.Handler {
 
 func (sh ServiceHandler) CreateService() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		userRole := ctx.Locals("userRole")
+		userId := ctx.Locals("userId")
+
 		newService := new(entities.Service)
+		shop, err := sh.ShopStore.FindShopById(newService.ShopID)
+
+		if err != nil || (shop.OwnerID != userId && userRole != "admin") {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
+				"statusCode": http.StatusUnauthorized,
+				"message":    "You are not authorized to perform this action",
+			})
+		}
+
 		if err := ctx.BodyParser(newService); err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"statusCode": http.StatusInternalServerError,
@@ -93,6 +105,15 @@ func (sh ServiceHandler) CreateService() fiber.Handler {
 
 func (sh ServiceHandler) EditService() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateService(ctx, sh)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
+				"statusCode": http.StatusUnauthorized,
+				"message":    "You are not authorized to perform this action",
+			})
+		}
+
 		serviceEdited := new(entities.Service)
 		serviceId := ctx.Params("serviceId")
 
@@ -125,6 +146,14 @@ func (sh ServiceHandler) EditService() fiber.Handler {
 
 func (sh ServiceHandler) DeleteService() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateService(ctx, sh)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
+				"statusCode": http.StatusUnauthorized,
+				"message":    "You are not authorized to perform this action",
+			})
+		}
 		serviceId := ctx.Params("serviceId")
 
 		code, err := sh.ServiceStore.RemoveService(serviceId)
@@ -135,4 +164,28 @@ func (sh ServiceHandler) DeleteService() fiber.Handler {
 		return ctx.SendStatus(code)
 	}
 
+}
+
+func canUpdateService(c *fiber.Ctx, h ServiceHandler) bool {
+	userRole := c.Locals("userRole")
+	userId := c.Locals("userId")
+	id := c.Params("id")
+
+	if userRole == "admin" {
+		return true
+	}
+
+	service, err := h.ServiceStore.FindServiceById(id)
+
+	if err != nil {
+		return false
+	}
+
+	shop, err := h.ShopStore.FindShopById(service.ShopID)
+
+	if err != nil || shop.OwnerID != userId {
+		return false
+	}
+
+	return true
 }
