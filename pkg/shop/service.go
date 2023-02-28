@@ -42,6 +42,19 @@ func (h Handler) GetShopById() fiber.Handler {
 	}
 }
 
+func (h Handler) GetShopsByUserId() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		ownerId := ctx.Params("ownerId")
+
+		shops, err := h.ShopStore.FindShopsByUserId(ownerId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return ctx.JSON(shops)
+	}
+}
+
 func (h Handler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		userRole := ctx.Locals("userRole")
