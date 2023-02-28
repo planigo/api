@@ -8,11 +8,11 @@ ENV GOARCH=$GOARCH
 WORKDIR /app
 COPY . .
 
-RUN go mod download && go mod verify && go build -o build/app api/app.go
+RUN go mod download && go mod verify && go build -o build/app main.go
 
 FROM scratch AS FINAL
 
 WORKDIR /main
-COPY --from=BUILDER /app .
-
+COPY --from=BUILDER /app/build/app .
+EXPOSE 8080
 CMD ["./app"]

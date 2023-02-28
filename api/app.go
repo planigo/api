@@ -2,16 +2,15 @@ package api
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"planigo/api/routes"
 	"planigo/config/database"
 	"planigo/pkg"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
 )
 
 func Start() {
@@ -19,9 +18,12 @@ func Start() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
 	}
+
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
