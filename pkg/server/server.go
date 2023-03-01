@@ -18,7 +18,7 @@ func Start() {
 		port = "8080"
 	}
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 
 	db, err := database.Connect()
