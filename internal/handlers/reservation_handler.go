@@ -28,7 +28,7 @@ func ReservationRoutes(app fiber.Router, handler *services.ReservationHandler) {
 	// can cancel only if the reservation is not started yet and it's owned by the user
 	r.Get(
 		"/cancel/:id",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		handler.CancelReservation(),
 	)
 }

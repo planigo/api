@@ -2,7 +2,6 @@ package services
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
@@ -15,11 +14,6 @@ import (
 type UserHandler struct {
 	*store.Store
 	*mail.Mailer
-	Session *session.Store
-}
-
-func NewUserHandler(store *store.Store, mailer *mail.Mailer, session *session.Store) *UserHandler {
-	return &UserHandler{store, mailer, session}
 }
 
 func (r UserHandler) FindUsers() fiber.Handler {
@@ -83,7 +77,7 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
-	validationToken := auth.GenerateJWT(&auth.TokenPayload{ID: user.Id})
+	validationToken := auth.GenerateJWT(&auth.TokenPayload{ID: user.Id, Role: user.Role})
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",

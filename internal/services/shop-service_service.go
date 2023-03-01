@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/internal/entities"
@@ -12,11 +11,6 @@ import (
 
 type ServiceHandler struct {
 	*store.Store
-	Session *session.Store
-}
-
-func NewServiceHandler(store *store.Store, session *session.Store) *ServiceHandler {
-	return &ServiceHandler{store, session}
 }
 
 func (sh ServiceHandler) GetServices() fiber.Handler {

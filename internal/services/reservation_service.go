@@ -3,27 +3,20 @@ package services
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/common"
-	"planigo/pkg/store"
 	"planigo/pkg/mail"
+	"planigo/pkg/store"
 	"planigo/utils"
 	"strconv"
 
 	"time"
-
 )
 
 type ReservationHandler struct {
 	*store.Store
-	Session *session.Store
 	*mail.Mailer
-}
-
-func NewReservationHandler(store *store.Store, session *session.Store, mailer *mail.Mailer) *ReservationHandler {
-	return &ReservationHandler{store, session, mailer}
 }
 
 func (h ReservationHandler) GetNextSlotsByDays() fiber.Handler {

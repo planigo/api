@@ -3,14 +3,16 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // TokenPayload defines the payload for the token
 type TokenPayload struct {
-	ID string
+	ID   string
+	Role string
 }
 
 func GenerateJWT(payload *TokenPayload) string {
@@ -20,8 +22,9 @@ func GenerateJWT(payload *TokenPayload) string {
 	}
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(v).Unix(),
-		"ID":  payload.ID,
+		"exp":  time.Now().Add(v).Unix(),
+		"ID":   payload.ID,
+		"Role": payload.Role,
 	})
 
 	token, err := t.SignedString([]byte(os.Getenv("JWT_SECRET")))
@@ -43,7 +46,6 @@ func parseJWT(token string) (*jwt.Token, error) {
 
 func VerifyJWT(token string) (*TokenPayload, error) {
 	parsed, err := parseJWT(token)
-
 	if err != nil {
 		println("Error: parseJWT ", err.Error(), "\n")
 		return nil, err
@@ -55,14 +57,18 @@ func VerifyJWT(token string) (*TokenPayload, error) {
 		println("Error: parsed.Claims.(jwt.MapClaims) ", err.Error(), "\n")
 		return nil, err
 	}
-
 	id, ok := claims["ID"].(string)
 	if !ok {
 		return nil, errors.New("something went wrong")
 	}
-	println("ID: VerifyJWT ", id)
+	role, ok := claims["Role"].(string)
+	if !ok {
+		return nil, errors.New("something went wrong")
+	}
+	fmt.Println("role: ", role)
 
 	return &TokenPayload{
-		ID: id,
+		ID:   id,
+		Role: role,
 	}, nil
 }

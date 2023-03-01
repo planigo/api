@@ -2,7 +2,6 @@ package services
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
@@ -10,11 +9,6 @@ import (
 
 type ShopHandler struct {
 	*store.Store
-	Session *session.Store
-}
-
-func NewShopHandler(store *store.Store, session *session.Store) *ShopHandler {
-	return &ShopHandler{store, session}
 }
 
 func (h ShopHandler) GetShops() fiber.Handler {
