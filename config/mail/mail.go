@@ -19,12 +19,17 @@ type Content struct {
 }
 
 func New() *Mailer {
-	return &Mailer{mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_PRIVATE"))}
+	return &Mailer{
+		mailgun.NewMailgun(
+			os.Getenv("MAILGUN_DOMAIN"),
+			os.Getenv("MAILGUN_PRIVATE"),
+		),
+	}
 }
 
 func (m *Mailer) Send(content Content) error {
 	msg := m.mailgun.NewMessage(os.Getenv("EMAIL_SENDER"), content.Subject, content.Body, content.To)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	resp, id, err := m.mailgun.Send(ctx, msg)

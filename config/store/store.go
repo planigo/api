@@ -1,23 +1,26 @@
 package store
 
-import "database/sql"
+import (
+	"database/sql"
+	"planigo/internal/stores"
+)
 
 type Store struct {
-	*UserStore
-	*ServiceStore
-	*ShopStore
-	*HourStore
-	*CategoryStore
-	*ReservationStore
+	*stores.UserStore
+	*stores.ServiceStore
+	*stores.ShopStore
+	*stores.HourStore
+	*stores.CategoryStore
+	*stores.ReservationStore
 }
 
 func NewStore(db *sql.DB) *Store {
 	return &Store{
-		NewUserStore(db),
-		NewServiceStore(db),
-		NewShopStore(db),
-		newHourStore(db),
-		newCategoryStore(db),
-		NewReservationStore(db),
+		stores.NewUserStore(db),
+		stores.NewServiceStore(db),
+		stores.NewShopStore(db),
+		stores.NewHourStore(db),
+		stores.NewCategoryStore(db),
+		stores.NewReservationStore(db),
 	}
 }

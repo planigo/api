@@ -1,0 +1,121 @@
+package services
+
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"log"
+	"net/http"
+	"planigo/config/store"
+	"planigo/internal/entities"
+)
+
+type HourHandler struct {
+	*store.Store
+	Session *session.Store
+}
+
+func (h HourHandler) GetHours() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		hours, err := h.HourStore.GetHours()
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(hours)
+	}
+}
+
+func (h HourHandler) GetHoursByShopId() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		shopId := ctx.Params("shopId")
+		hours, err := h.FindHoursByShopId(shopId)
+		if err != nil {
+			return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return ctx.JSON(hours)
+	}
+}
+
+func (h HourHandler) CreateHour() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		hour := parseHourBody(c)
+
+		createdHour, err := h.HourStore.CreateHour(*hour)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(createdHour)
+	}
+}
+
+func (h HourHandler) GetHourById() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		hours, err := h.HourStore.GetHourById(id)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(hours)
+	}
+}
+
+func (h HourHandler) DeleteHour() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		println(id)
+
+		err := h.HourStore.DeleteHour(id)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return c.SendStatus(http.StatusNoContent)
+	}
+}
+
+func (h HourHandler) UpdateHour() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		updatedHour := parseHourBody(c)
+
+		hour, err := h.HourStore.UpdateHour(id, *updatedHour)
+
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(hour)
+	}
+}
+
+func parseHourBody(c *fiber.Ctx) *entities.Hour {
+	hour := new(entities.Hour)
+	if err := c.BodyParser(hour); err != nil {
+		log.Fatal(err)
+	}
+
+	return hour
+}
