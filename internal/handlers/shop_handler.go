@@ -11,6 +11,8 @@ func ShopRoutes(app fiber.Router, handler *services.ShopHandler) {
 
 	router.Get("/", handler.GetShops())
 	router.Get("/:shopId", handler.GetShopById())
+	router.Get("/owner/:ownerId", handler.GetShopsByUserId())
+
 
 	router.Post("/",
 		middlewares.IsLoggedIn,

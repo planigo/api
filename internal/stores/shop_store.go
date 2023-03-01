@@ -39,6 +39,28 @@ func (store *ShopStore) FindShops() ([]entities.Shop, error) {
 	return shops, nil
 }
 
+func (store *ShopStore) FindShopsByUserId(userId string) ([]entities.Shop, error) {
+	var shops []entities.Shop
+
+	rows, err := store.Query("SELECT id, slug, name, description, owner_id, category_id FROM Shop WHERE owner_id = ?", userId)
+	if err != nil {
+		return shops, err
+	}
+
+	for rows.Next() {
+		var shopRow entities.Shop
+		if err := rows.Scan(&shopRow.Id, &shopRow.Slug, &shopRow.Name, &shopRow.Description, &shopRow.OwnerID, &shopRow.CategoryID); err != nil {
+			return shops, err
+		}
+		shops = append(shops, shopRow)
+	}
+
+	if err := rows.Err(); err != nil {
+		return shops, err
+	}
+	return shops, nil
+}
+
 func (store *ShopStore) FindShopById(shopId string) (entities.Shop, error) {
 	var shop entities.Shop
 
