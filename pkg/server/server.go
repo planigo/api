@@ -8,8 +8,8 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"planigo/config/database"
 	handlers2 "planigo/internal/handlers"
+	"planigo/pkg/database"
 )
 
 func Start() {

@@ -3,9 +3,9 @@ package server
 import (
 	"database/sql"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"planigo/config/mail"
-	"planigo/config/store"
 	"planigo/internal/services"
+	"planigo/pkg/mail"
+	"planigo/pkg/store"
 	"time"
 )
 
