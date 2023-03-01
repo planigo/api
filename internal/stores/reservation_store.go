@@ -76,10 +76,10 @@ func (r ReservationStore) GetReservationById(id string) (common.DetailedReservat
 		Scan(
 			&reservation.ReservationId,
 			&reservation.ServiceId,
+			&reservation.UserId,
 			&reservation.ServiceName,
 			&reservation.Duration,
 			&reservation.Start,
-			&reservation.UserId,
 		)
 	if err != nil {
 		fmt.Println(err.Error())
