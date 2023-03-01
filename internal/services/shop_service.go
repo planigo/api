@@ -1,8 +1,10 @@
 package services
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
 )
@@ -12,68 +14,62 @@ type ShopHandler struct {
 }
 
 func (h ShopHandler) GetShops() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
 		shops, err := h.ShopStore.FindShops()
 		if err != nil {
-			log.Fatal(err)
+			return presenter.Error(c, fiber.StatusNotFound, errors.New(presenter.RessourceNotFound))
 		}
 
-		return ctx.JSON(shops)
+		return presenter.Response(c, fiber.StatusOK, shops)
 	}
 }
 
 func (h ShopHandler) GetShopById() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		shopId := ctx.Params("shopId")
+	return func(c *fiber.Ctx) error {
+		shopId := c.Params("shopId")
 
 		shop, err := h.ShopStore.FindShopById(shopId)
 		if err != nil {
-			log.Fatal(err)
+			return presenter.Error(c, fiber.StatusNotFound, errors.New(presenter.RessourceNotFound))
 		}
 
-		return ctx.JSON(shop)
+		return presenter.Response(c, fiber.StatusOK, shop)
 	}
 }
 
 func (h ShopHandler) CreateShop() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		userRole := ctx.Locals("userRole")
+	return func(c *fiber.Ctx) error {
+		userRole := c.Locals("userRole")
 
 		if userRole != "admin" {
-			return ctx.Status(401).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to create this resource",
-			})
+			return presenter.Error(c, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
 		}
 		newShop := new(entities.ShopRequest)
-		if err := ctx.BodyParser(newShop); err != nil {
+		if err := c.BodyParser(newShop); err != nil {
 			return err
 		}
 
 		shop, err := h.ShopStore.AddShop(*newShop)
-
 		if err != nil {
-			log.Fatal(err)
+			return presenter.Error(c, fiber.StatusNotFound, errors.New(presenter.CannotAddShop))
 		}
 
-		return ctx.JSON(shop)
+		return presenter.Response(c, fiber.StatusOK, shop)
 	}
 }
 
 func (h ShopHandler) EditShop() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		isAllowedToUpdate := canUpdateShop(ctx, h)
+	return func(c *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(c, h)
 
 		if !isAllowedToUpdate {
-			return ctx.Status(401).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to update this resource",
-			})
+			return presenter.Error(c, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
+
 		}
 		shopEdited := new(entities.ShopRequest)
-		shopId := ctx.Params("shopId")
+		shopId := c.Params("shopId")
 
-		if err := ctx.BodyParser(shopEdited); err != nil {
+		if err := c.BodyParser(shopEdited); err != nil {
 			return err
 		}
 
@@ -87,42 +83,39 @@ func (h ShopHandler) EditShop() fiber.Handler {
 			log.Fatal(err)
 		}
 
-		return ctx.JSON(shop)
+		return presenter.Response(c, fiber.StatusOK, shop)
 	}
 }
 
 func (h ShopHandler) DeleteShop() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		isAllowedToUpdate := canUpdateShop(ctx, h)
+	return func(c *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(c, h)
 
 		if !isAllowedToUpdate {
-			return ctx.Status(401).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to update this resource",
-			})
+			return presenter.Error(c, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
 		}
 
-		shopId := ctx.Params("shopId")
+		shopId := c.Params("shopId")
 
 		code, err := h.ShopStore.RemoveShop(shopId)
 		if err != nil {
 			log.Fatal(code, err)
 		}
 
-		return ctx.SendStatus(code)
+		return presenter.Response(c, fiber.StatusOK, "")
 	}
 }
 
 func (h ShopHandler) GetShopsByCategorySlug() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		categorySlug := ctx.Params("categorySlug")
+	return func(c *fiber.Ctx) error {
+		categorySlug := c.Params("categorySlug")
 
 		shops, err := h.ShopStore.FindShopsByCategorySlug(categorySlug)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		return ctx.JSON(shops)
+		return presenter.Response(c, fiber.StatusOK, shops)
 	}
 }
 

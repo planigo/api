@@ -1,10 +1,9 @@
 package services
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gofiber/fiber/v2"
-	"log"
-	"net/http"
+	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
 )
@@ -17,13 +16,10 @@ func (sh ServiceHandler) GetServices() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		services, err := sh.ServiceStore.FindServices()
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
-		return ctx.JSON(services)
+		return presenter.Response(ctx, fiber.StatusOK, services)
 	}
 }
 
@@ -32,13 +28,10 @@ func (sh ServiceHandler) GetServicesByShopId() fiber.Handler {
 		shopId := ctx.Params("shopId")
 		services, err := sh.ServiceStore.FindServicesByShopId(shopId)
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
-		return ctx.JSON(services)
+		return presenter.Response(ctx, fiber.StatusOK, services)
 	}
 }
 
@@ -49,13 +42,10 @@ func (sh ServiceHandler) GetServiceById() fiber.Handler {
 		service, err := sh.ServiceStore.FindServiceById(serviceId)
 
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
-		return ctx.JSON(service)
+		return presenter.Response(ctx, fiber.StatusOK, service)
 	}
 }
 
@@ -68,31 +58,23 @@ func (sh ServiceHandler) CreateService() fiber.Handler {
 		shop, err := sh.ShopStore.FindShopById(newService.ShopID)
 
 		if err != nil || (shop.OwnerID != userId && userRole != "admin") {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
-				"statusCode": http.StatusUnauthorized,
-				"message":    "You are not authorized to perform this action",
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, errors.New(presenter.ActionNotAllowed))
+
 		}
 
 		if err := ctx.BodyParser(newService); err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
 		serviceId, err := sh.ServiceStore.AddService(*newService)
 
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
 		service, _ := sh.ServiceStore.FindServiceById(serviceId)
 
-		return ctx.JSON(service)
+		return presenter.Response(ctx, fiber.StatusOK, service)
 	}
 }
 
@@ -101,39 +83,27 @@ func (sh ServiceHandler) EditService() fiber.Handler {
 		isAllowedToUpdate := canUpdateService(ctx, sh)
 
 		if !isAllowedToUpdate {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
-				"statusCode": http.StatusUnauthorized,
-				"message":    "You are not authorized to perform this action",
-			})
+			return presenter.Error(ctx, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
 		}
 
 		serviceEdited := new(entities.Service)
 		serviceId := ctx.Params("serviceId")
 
 		if err := ctx.BodyParser(serviceEdited); err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    err.Error(),
-			})
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
 		serviceId, err := sh.ServiceStore.UpdateService(serviceId, *serviceEdited)
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    "User does not found",
-			})
+			return presenter.Error(ctx, fiber.StatusNotFound, err)
 		}
 
 		service, err := sh.ServiceStore.FindServiceById(serviceId)
 		if err != nil {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    fmt.Sprintf("Service %s not found", serviceId),
-			})
+			return presenter.Error(ctx, fiber.StatusNotFound, errors.New(presenter.RessourceNotFound))
 		}
 
-		return ctx.JSON(service)
+		return presenter.Response(ctx, fiber.StatusOK, service)
 	}
 }
 
@@ -142,19 +112,16 @@ func (sh ServiceHandler) DeleteService() fiber.Handler {
 		isAllowedToUpdate := canUpdateService(ctx, sh)
 
 		if !isAllowedToUpdate {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(&fiber.Map{
-				"statusCode": http.StatusUnauthorized,
-				"message":    "You are not authorized to perform this action",
-			})
+			return presenter.Error(ctx, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
 		}
 		serviceId := ctx.Params("serviceId")
 
-		code, err := sh.ServiceStore.RemoveService(serviceId)
+		_, err := sh.ServiceStore.RemoveService(serviceId)
 		if err != nil {
-			log.Fatal(code, err)
+			return presenter.Error(ctx, fiber.StatusForbidden, errors.New(presenter.CannotRemoveService))
 		}
 
-		return ctx.SendStatus(code)
+		return presenter.Response(ctx, fiber.StatusOK, "")
 	}
 
 }

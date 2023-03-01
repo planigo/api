@@ -2,8 +2,8 @@ package stores
 
 import (
 	"database/sql"
+	"github.com/gofiber/fiber/v2"
 	"log"
-	"net/http"
 	"planigo/internal/entities"
 )
 
@@ -81,10 +81,10 @@ func (store *ShopStore) RemoveShop(shopId string) (int, error) {
 	_, err := store.Exec("DELETE FROM Shop WHERE id = ?;", shopId)
 
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return fiber.StatusInternalServerError, err
 	}
 
-	return http.StatusNoContent, nil
+	return fiber.StatusNoContent, nil
 }
 
 func (store *ShopStore) FindShopsByCategorySlug(categorySlug string) ([]entities.Shop, error) {

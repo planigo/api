@@ -1,10 +1,11 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"log"
-	"net/http"
+	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
 )
@@ -17,28 +18,24 @@ func (h HourHandler) GetHours() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		hours, err := h.HourStore.GetHours()
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
-		return c.JSON(hours)
+		return presenter.Response(c, fiber.StatusOK, hours)
 	}
 }
 
 func (h HourHandler) GetHoursByShopId() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		shopId := ctx.Params("shopId")
+	return func(c *fiber.Ctx) error {
+		shopId := c.Params("shopId")
 		hours, err := h.FindHoursByShopId(shopId)
 		if err != nil {
-			return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
+
 		}
 
-		return ctx.JSON(hours)
+		return presenter.Response(c, fiber.StatusOK, hours)
+
 	}
 }
 
@@ -52,21 +49,15 @@ func (h HourHandler) CreateHour() fiber.Handler {
 		shop, err := h.ShopStore.FindShopById(hour.ShopID)
 
 		if err != nil || (shop.OwnerID != userId && userRole != "admin") {
-			return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to create this resource",
-			})
+			return presenter.Error(c, fiber.StatusUnauthorized, errors.New(presenter.RessourceNotAuthorized))
 		}
 
 		createdHour, err := h.HourStore.CreateHour(*hour)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
-		return c.JSON(createdHour)
+		return presenter.Response(c, fiber.StatusOK, createdHour)
 	}
 }
 
@@ -76,13 +67,10 @@ func (h HourHandler) GetHourById() fiber.Handler {
 
 		hours, err := h.HourStore.GetHourById(id)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
-		return c.JSON(hours)
+		return presenter.Response(c, fiber.StatusOK, hours)
 	}
 }
 
@@ -92,22 +80,17 @@ func (h HourHandler) DeleteHour() fiber.Handler {
 		isAllowedToUpdate := canUpdateHour(c, h)
 
 		if !isAllowedToUpdate {
-			return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to delete this resource",
-			})
+			return presenter.Error(c, fiber.StatusUnauthorized, errors.New(presenter.RessourceNotAuthorized))
 		}
 
 		id := c.Params("id")
 		err := h.HourStore.DeleteHour(id)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
+
 		}
 
-		return c.SendStatus(http.StatusNoContent)
+		return c.SendStatus(fiber.StatusNoContent)
 	}
 }
 
@@ -116,10 +99,7 @@ func (h HourHandler) UpdateHour() fiber.Handler {
 		isAllowedToUpdate := canUpdateHour(c, h)
 
 		if !isAllowedToUpdate {
-			return c.Status(http.StatusUnauthorized).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to update this resource",
-			})
+			return presenter.Error(c, fiber.StatusUnauthorized, errors.New(presenter.RessourceNotAuthorized))
 		}
 		id := c.Params("id")
 		updatedHour := parseHourBody(c)
@@ -127,13 +107,10 @@ func (h HourHandler) UpdateHour() fiber.Handler {
 		hour, err := h.HourStore.UpdateHour(id, *updatedHour)
 
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
-		return c.JSON(hour)
+		return presenter.Response(c, fiber.StatusOK, hour)
 	}
 }
 
