@@ -20,7 +20,9 @@ type Handlers struct {
 }
 
 func RegisterHandlers(db *sql.DB) *Handlers {
-	sessionConfig := session.Config{Expiration: 48 * time.Hour}
+	sessionConfig := session.Config{
+		Expiration: 48 * time.Hour,
+	}
 	mailer := mail.New()
 	store2 := store.NewStore(db)
 	sess := session.New(sessionConfig)
