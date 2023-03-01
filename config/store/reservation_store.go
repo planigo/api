@@ -96,7 +96,7 @@ func (r ReservationStore) BookReservation(
 	userId string,
 ) (common.DetailedReservation, error) {
 	serviceReservation := common.DetailedReservation{}
-	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ?;"
+	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ? AND r.is_cancelled = FALSE;"
 	rows, err := r.Query(query, shopId, start)
 	if rows.Next() {
 		return serviceReservation, errors.New("The slot is no longer available")

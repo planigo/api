@@ -44,6 +44,14 @@ func (h Handler) GetShopById() fiber.Handler {
 
 func (h Handler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		userRole := ctx.Locals("userRole")
+
+		if userRole != "admin" {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to create this resource",
+			})
+		}
 		newShop := new(entities.ShopRequest)
 		if err := ctx.BodyParser(newShop); err != nil {
 			return err
@@ -61,6 +69,14 @@ func (h Handler) CreateShop() fiber.Handler {
 
 func (h Handler) EditShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(ctx, h)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to update this resource",
+			})
+		}
 		shopEdited := new(entities.ShopRequest)
 		shopId := ctx.Params("shopId")
 
@@ -84,6 +100,15 @@ func (h Handler) EditShop() fiber.Handler {
 
 func (h Handler) DeleteShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(ctx, h)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to update this resource",
+			})
+		}
+
 		shopId := ctx.Params("shopId")
 
 		code, err := h.ShopStore.RemoveShop(shopId)
@@ -106,4 +131,21 @@ func (h Handler) GetShopsByCategorySlug() fiber.Handler {
 
 		return ctx.JSON(shops)
 	}
+}
+
+func canUpdateShop(c *fiber.Ctx, h Handler) bool {
+	shopId := c.Params("shopId")
+	userId := c.Locals("userId")
+	userRole := c.Locals("userRole")
+
+	if userRole == "admin" {
+		return true
+	}
+
+	shop, err := h.ShopStore.FindShopById(shopId)
+	if err != nil || (shop.OwnerID != userId) {
+		return false
+	}
+
+	return true
 }

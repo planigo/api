@@ -2,21 +2,28 @@ package api
 
 import (
 	"fmt"
-	"log"
-	"planigo/api/routes"
-	"planigo/config/database"
-	"planigo/pkg"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
+	"planigo/api/routes"
+	"planigo/config/database"
+	"planigo/pkg"
 )
 
 func Start() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -52,5 +59,5 @@ func Start() {
 		return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{"status": "fail", "message": errorMessage})
 	})
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(":" + port))
 }
