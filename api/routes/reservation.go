@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"planigo/api/middlewares"
 	"planigo/pkg/reservation"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func ReservationRoutes(app fiber.Router, handler *reservation.Handler) {
@@ -12,6 +13,11 @@ func ReservationRoutes(app fiber.Router, handler *reservation.Handler) {
 	r.Get(
 		"slots/:shopId",
 		handler.GetNextSlotsByDays(),
+	)
+
+	r.Get(
+		"slots/users/:userId",
+		handler.GetSlotsBookedByUser(),
 	)
 
 	r.Post(
