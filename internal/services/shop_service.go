@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
-	"planigo/config/store"
 	"planigo/internal/entities"
+	"planigo/pkg/store"
 )
 
 type ShopHandler struct {
@@ -43,6 +43,14 @@ func (h ShopHandler) GetShopById() fiber.Handler {
 
 func (h ShopHandler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		userRole := ctx.Locals("userRole")
+
+		if userRole != "admin" {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to create this resource",
+			})
+		}
 		newShop := new(entities.ShopRequest)
 		if err := ctx.BodyParser(newShop); err != nil {
 			return err
@@ -60,6 +68,14 @@ func (h ShopHandler) CreateShop() fiber.Handler {
 
 func (h ShopHandler) EditShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(ctx, h)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to update this resource",
+			})
+		}
 		shopEdited := new(entities.ShopRequest)
 		shopId := ctx.Params("shopId")
 
@@ -83,6 +99,15 @@ func (h ShopHandler) EditShop() fiber.Handler {
 
 func (h ShopHandler) DeleteShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		isAllowedToUpdate := canUpdateShop(ctx, h)
+
+		if !isAllowedToUpdate {
+			return ctx.Status(401).JSON(&fiber.Map{
+				"status":  "fail",
+				"message": "You are not authorized to update this resource",
+			})
+		}
+
 		shopId := ctx.Params("shopId")
 
 		code, err := h.ShopStore.RemoveShop(shopId)
@@ -105,4 +130,21 @@ func (h ShopHandler) GetShopsByCategorySlug() fiber.Handler {
 
 		return ctx.JSON(shops)
 	}
+}
+
+func canUpdateShop(c *fiber.Ctx, h ShopHandler) bool {
+	shopId := c.Params("shopId")
+	userId := c.Locals("userId")
+	userRole := c.Locals("userRole")
+
+	if userRole == "admin" {
+		return true
+	}
+
+	shop, err := h.ShopStore.FindShopById(shopId)
+	if err != nil || (shop.OwnerID != userId) {
+		return false
+	}
+
+	return true
 }

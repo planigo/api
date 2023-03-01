@@ -6,10 +6,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"planigo/config/mail"
-	"planigo/config/store"
 	"planigo/core/auth"
 	"planigo/internal/entities"
+	"planigo/pkg/mail"
+	"planigo/pkg/store"
 )
 
 type UserHandler struct {

@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 	"planigo/common"
-	"planigo/config/mail"
-	"planigo/config/store"
+	"planigo/pkg/store"
+	"planigo/pkg/mail"
 	"planigo/utils"
 	"strconv"
+
 	"time"
+
 )
 
 type ReservationHandler struct {
@@ -51,6 +53,23 @@ func (h ReservationHandler) GetNextSlotsByDays() fiber.Handler {
 		return ctx.
 			Status(http.StatusOK).
 			JSON(utils.FillEmptySlotsWithReservationByDate(emptySlots, bookedReservations))
+	}
+}
+
+func (h ReservationHandler) GetSlotsBookedByUser() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		userId := ctx.Params("userId")
+		fmt.Println(userId)
+
+		bookedReservation, err := h.ReservationStore.GetSlotsBookedByUserId(userId)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"statusCode": fiber.ErrInternalServerError,
+				"message":    err.Error(),
+			})
+		}
+
+		return ctx.Status(http.StatusOK).JSON(bookedReservation)
 	}
 }
 

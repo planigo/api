@@ -3,7 +3,7 @@ package services
 import (
 	"github.com/gofiber/fiber/v2"
 	"net/http"
-	"planigo/config/store"
+	"planigo/pkg/store"
 )
 
 type CategoryHandler struct {

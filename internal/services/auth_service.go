@@ -5,9 +5,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"net/http"
-	"planigo/config/mail"
-	"planigo/config/store"
 	"planigo/internal/entities"
+	"planigo/pkg/mail"
+	"planigo/pkg/store"
 )
 
 type AuthHandler struct {

@@ -78,7 +78,7 @@ func (s HourStore) CreateHour(hour entities.Hour) (entities.Hour, error) {
 func (s HourStore) GetHourById(shopId string) (entities.Hour, error) {
 	hour := entities.Hour{}
 
-	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE shop_id = ?"
+	query := "SELECT id, start, end, day, shop_id FROM Hour WHERE id = ?"
 
 	if err := s.
 		QueryRow(query, shopId).

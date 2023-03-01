@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	handlers2 "planigo/internal/handlers"
+	routes "planigo/internal/handlers"
 	"planigo/pkg/database"
 )
 
@@ -39,13 +39,13 @@ func Start() {
 	handlers := RegisterHandlers(db)
 
 	// Routers
-	handlers2.UserRoutes(api, handlers.UserHandler)
-	handlers2.AuthRoutes(api, handlers.AuthHandler)
-	handlers2.ShopRoutes(api, handlers.ShopHandler)
-	handlers2.HourRoutes(api, handlers.HourHandler)
-	handlers2.ServicesRoutes(api, handlers.ServiceHandler)
-	handlers2.CategoryRoutes(api, handlers.CategoryHandler)
-	handlers2.ReservationRoutes(api, handlers.ReservationHandler)
+	routes.UserRoutes(api, handlers.UserHandler)
+	routes.AuthRoutes(api, handlers.AuthHandler)
+	routes.ShopRoutes(api, handlers.ShopHandler)
+	routes.HourRoutes(api, handlers.HourHandler)
+	routes.ServicesRoutes(api, handlers.ServiceHandler)
+	routes.CategoryRoutes(api, handlers.CategoryHandler)
+	routes.ReservationRoutes(api, handlers.ReservationHandler)
 
 	// Endpoint for 'Not Found'.
 	app.All("*", func(c *fiber.Ctx) error {
