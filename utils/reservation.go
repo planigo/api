@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"planigo/common"
 	"planigo/internal/entities"
 	"time"
@@ -21,7 +20,6 @@ func CreateEmptySlotsWithShopHours(shopHoursByWeekDay []entities.Hour, nbOfDaysT
 	for _, day := range GetNextDaysDate(nbOfDaysToDisplayExcludeToday) {
 		var slot common.DaySlot
 		dayKey := GetDayNumberWithSundayAsLast(int(day.Weekday()))
-		fmt.Println("dayKey : ", dayKey)
 		slot.Date = day.Format("2006-01-02")
 		if shopHour, ok := shopHoursByWeekDayMap[dayKey]; ok {
 			slot.Slots = ComputeEmptySlots(shopHour.Start, shopHour.End)

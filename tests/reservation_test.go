@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"planigo/common"
 	"planigo/internal/entities"
 	"planigo/utils"
@@ -26,13 +27,8 @@ func TestComputeEmptySlots(t *testing.T) {
 		},
 	}
 
-	if slots[0].Start != exceptedSlot[0].Start {
-		t.Errorf("start: got %s, want %s", slots[0].Start, exceptedSlot[0].Start)
-	}
-
-	if slots[0].End != exceptedSlot[0].End {
-		t.Errorf("end: got %s, want %s", slots[0].End, exceptedSlot[0].End)
-	}
+	assert.Equal(t, slots[0].Start, exceptedSlot[0].Start)
+	assert.Equal(t, slots[0].End, exceptedSlot[0].End)
 }
 
 func TestGetNextDaysDate(t *testing.T) {
@@ -45,17 +41,15 @@ func TestGetNextDaysDate(t *testing.T) {
 		dateNow.AddDate(0, 0, 2).Format("2006-01-02"),
 	}
 
-	if dates[0].Format("2006-01-02") != expectedDates[0] || dates[1].Format("2006-01-02") != expectedDates[1] || dates[2].Format("2006-01-02") != expectedDates[2] {
-		t.Errorf("got %+v, want %+v", dates, expectedDates)
-	}
+	assert.Equal(t, dates[0].Format("2006-01-02"), expectedDates[0])
+	assert.Equal(t, dates[1].Format("2006-01-02"), expectedDates[1])
+	assert.Equal(t, dates[2].Format("2006-01-02"), expectedDates[2])
 
 	dates = utils.GetNextDaysDate(3)
 
 	expectedDates = append(expectedDates, dateNow.AddDate(0, 0, 3).Format("2006-01-02"))
 
-	if dates[3].Format("2006-01-02") != expectedDates[3] {
-		t.Errorf("got %+v, want %+v", dates, expectedDates)
-	}
+	assert.Equal(t, dates[3].Format("2006-01-02"), expectedDates[3])
 }
 
 func TestCreateEmptySlotsMapByShopHours(t *testing.T) {
@@ -71,21 +65,10 @@ func TestCreateEmptySlotsMapByShopHours(t *testing.T) {
 
 	emptySlotsMap := utils.CreateEmptySlotsWithShopHours(shopHoursByWeekDay, 6)
 
-	if len(emptySlotsMap) != 7 {
-		t.Errorf("emptySlotsMap : got %d, want %d", len(emptySlotsMap), 7)
-	}
-
-	if emptySlotsMap[0].Date != time.Now().Format("2006-01-02") {
-		t.Errorf("First slot date : got %v, want %v", len(emptySlotsMap[0].Date), time.Now().Format("2006-01-02"))
-	}
-
-	if len(emptySlotsMap[0].Slots) != 9 {
-		t.Errorf("emptySlotsMap[0].Slots : got %d, want %d", len(emptySlotsMap[0].Slots), 9)
-	}
-
-	if emptySlotsMap[1].Date != tomorrow.Format("2006-01-02") {
-		t.Errorf("First slot date : got %v, want %v", len(emptySlotsMap[1].Date), tomorrow.Format("2006-01-02"))
-	}
+	assert.Equal(t, len(emptySlotsMap), 7)
+	assert.Equal(t, emptySlotsMap[0].Date, time.Now().Format("2006-01-02"))
+	assert.Equal(t, len(emptySlotsMap[0].Slots), 9)
+	assert.Equal(t, emptySlotsMap[1].Date, tomorrow.Format("2006-01-02"))
 }
 
 func TestMakeReservationMap(t *testing.T) {
@@ -107,9 +90,7 @@ func TestMakeReservationMap(t *testing.T) {
 		key: reservations[0],
 	}
 
-	if reservationMap[key].ReservationId != expectedReservationsMap[key].ReservationId {
-		t.Errorf("got %s, want %s", reservationMap[key].ReservationId, expectedReservationsMap[key].ReservationId)
-	}
+	assert.Equal(t, reservationMap[key].ReservationId, expectedReservationsMap[key].ReservationId)
 }
 
 func TestFillEmptySlotsWithReservationByDate(t *testing.T) {
@@ -129,14 +110,7 @@ func TestFillEmptySlotsWithReservationByDate(t *testing.T) {
 		{ReservationId: "1", ServiceId: "1", ServiceName: "coiffure homme", Start: tomorrow.Format("2006-01-02 15:04:05")},
 	})
 
-	fmt.Println("daySlots", daySlots)
-
-	if daySlots[1].Slots[0].IsAvailable {
-		t.Errorf("got %t, want %t", daySlots[1].Slots[0].IsAvailable, false)
-	}
-
-	if daySlots[1].Slots[0].ReservationId != "1" {
-		t.Errorf("got %s, want %s", daySlots[1].Slots[0].ReservationId, "1")
-	}
+	assert.False(t, daySlots[1].Slots[0].IsAvailable)
+	assert.Equal(t, daySlots[1].Slots[0].ReservationId, "1")
 
 }
