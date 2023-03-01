@@ -10,7 +10,6 @@ import (
 	"planigo/pkg/store"
 	"planigo/utils"
 	"strconv"
-
 	"time"
 )
 
@@ -52,7 +51,6 @@ func (h ReservationHandler) GetNextSlotsByDays() fiber.Handler {
 func (h ReservationHandler) GetSlotsBookedByUser() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		userId := ctx.Params("userId")
-		fmt.Println(userId)
 
 		bookedReservation, err := h.ReservationStore.GetSlotsBookedByUserId(userId)
 		if err != nil {
@@ -63,6 +61,22 @@ func (h ReservationHandler) GetSlotsBookedByUser() fiber.Handler {
 		}
 
 		return ctx.Status(http.StatusOK).JSON(bookedReservation)
+	}
+}
+
+func (h ReservationHandler) GetSlotsBookedByShop() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		shopId := ctx.Params("shopId")
+
+		reservations, err := h.ReservationStore.FindSlotsBookedFilteredShopId(shopId)
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"statusCode": fiber.ErrInternalServerError,
+				"message":    err.Error(),
+			})
+		}
+
+		return ctx.Status(http.StatusOK).JSON(reservations)
 	}
 }
 
@@ -106,7 +120,8 @@ func (h ReservationHandler) BookReservationByShopId() fiber.Handler {
 			})
 		}
 
-		user, err := h.UserStore.FindUserById(reservation.UserId)
+		user, err := h.UserStore.FindUserById(body.UserId)
+
 		if err != nil {
 			log.Println(err.Error())
 		}

@@ -19,14 +19,14 @@ func NewUserStore(db *sql.DB) *UserStore {
 func (store *UserStore) FindUsers() ([]entities.User, error) {
 	var users []entities.User
 
-	rows, err := store.Query("SELECT id, firstname, lastname, role, is_email_verified FROM User")
+	rows, err := store.Query("SELECT id, firstname, lastname, email, role, is_email_verified FROM User")
 	if err != nil {
 		return users, err
 	}
 
 	for rows.Next() {
 		var userRow entities.User
-		if err := rows.Scan(&userRow.Id, &userRow.Firstname, &userRow.Lastname, &userRow.Role, &userRow.IsEmailVerified); err != nil {
+		if err := rows.Scan(&userRow.Id, &userRow.Firstname, &userRow.Lastname, &userRow.Lastname, &userRow.Role, &userRow.IsEmailVerified); err != nil {
 			return users, err
 		}
 		users = append(users, userRow)
