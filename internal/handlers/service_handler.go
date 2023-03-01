@@ -16,18 +16,18 @@ func ServicesRoutes(app fiber.Router, handler *services.ServiceHandler) {
 
 	router.Post(
 		"/",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.CreateService(),
 	)
 
 	router.Patch("/:serviceId",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.EditService(),
 	)
 	router.Delete("/:serviceId",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.DeleteService(),
 	)

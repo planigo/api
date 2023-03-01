@@ -13,20 +13,20 @@ func HourRoutes(app fiber.Router, handler *services.HourHandler) {
 	hourRoutes.Get("/:shopId", handler.GetHoursByShopId())
 	hourRoutes.Post(
 		"/",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.CreateHour(),
 	)
 	hourRoutes.Get("/:id", handler.GetHourById())
 	hourRoutes.Delete(
 		"/:id",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.DeleteHour(),
 	)
 	hourRoutes.Put(
 		"/:id",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin", "owner"}),
 		handler.UpdateHour(),
 	)

@@ -1,24 +1,32 @@
 package middlewares
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"net/http"
+	"planigo/core/auth"
+	"strings"
 )
 
-func IsLoggedIn(r *session.Store) func(c *fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
-		sess, err := r.Get(c)
-		if err != nil {
-			panic(err)
-		}
-		if sess.Get(sess.ID()) == nil {
-			return c.SendStatus(http.StatusUnauthorized)
-		}
-
-		c.Locals("userId", sess.Get(sess.ID()))
-		c.Locals("userRole", sess.Get("role"))
-
-		return c.Next()
+func IsLoggedIn(c *fiber.Ctx) error {
+	authHeader := c.GetReqHeaders()["Authorization"]
+	if authHeader == "" {
+		return c.SendStatus(fiber.StatusUnauthorized)
 	}
+
+	authToken := strings.Split(authHeader, " ")
+	if len(authToken) != 2 {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	jwt := authToken[1]
+	payload, err := auth.VerifyJWT(jwt)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	c.Locals("userId", payload.ID)
+	c.Locals("userRole", payload.Role)
+
+	return c.Next()
 }

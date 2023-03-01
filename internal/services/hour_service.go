@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"net/http"
 	"planigo/internal/entities"
@@ -12,7 +11,6 @@ import (
 
 type HourHandler struct {
 	*store.Store
-	Session *session.Store
 }
 
 func (h HourHandler) GetHours() fiber.Handler {

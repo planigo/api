@@ -1,10 +1,9 @@
 package services
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"net/http"
+	"planigo/core/auth"
 	"planigo/internal/entities"
 	"planigo/pkg/mail"
 	"planigo/pkg/store"
@@ -13,11 +12,6 @@ import (
 type AuthHandler struct {
 	*store.Store
 	*mail.Mailer
-	Session *session.Store
-}
-
-func NewAuthHandler(store *store.Store, mailer *mail.Mailer, session *session.Store) *AuthHandler {
-	return &AuthHandler{store, mailer, session}
 }
 
 func (r AuthHandler) Login() fiber.Handler {
@@ -50,35 +44,16 @@ func (r AuthHandler) Login() fiber.Handler {
 			})
 		}
 
-		sess, err := r.Session.Get(ctx)
-		if err != nil {
-			panic(err)
-		}
-
-		sid := sess.ID()
-		sess.Set(sid, findedUser.Id)
-		sess.Set("role", findedUser.Role)
-
-		if err := sess.Save(); err != nil {
-			panic(err)
-		}
-
-		return ctx.SendStatus(http.StatusOK)
+		return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
+			"access_token": auth.GenerateJWT(&auth.TokenPayload{ID: findedUser.Id, Role: findedUser.Role}),
+		})
 	}
 }
 
 func (r AuthHandler) Me() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-
-		sess, err := r.Session.Get(ctx)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println(sess.Get(sess.ID()))
-		fmt.Println(sess.Get("role"))
-
-		userById, err := r.UserStore.FindUserById(sess.Get(sess.ID()).(string))
+		id := ctx.Locals("userId").(string)
+		userById, err := r.UserStore.FindUserById(id)
 		if err != nil {
 			return err
 		}
@@ -89,16 +64,6 @@ func (r AuthHandler) Me() fiber.Handler {
 
 func (r AuthHandler) Logout() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		sess, err := r.Session.Get(ctx)
-		if err != nil {
-			panic(err)
-		}
-
-		err = sess.Destroy()
-		if err != nil {
-			return err
-		}
-
 		return ctx.SendStatus(http.StatusOK)
 	}
 }

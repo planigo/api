@@ -10,7 +10,7 @@ func UserRoutes(app fiber.Router, handler *services.UserHandler) {
 	router := app.Group("/users")
 
 	router.Get("/",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin"}),
 		handler.FindUsers(),
 	)

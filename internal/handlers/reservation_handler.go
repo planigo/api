@@ -11,7 +11,7 @@ func ReservationRoutes(app fiber.Router, handler *services.ReservationHandler) {
 	r := app.Group("/reservation")
 
 	r.Get("shop/:shopId",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin"}),
 		handler.GetSlotsBookedByShop(),
 	)
@@ -34,7 +34,7 @@ func ReservationRoutes(app fiber.Router, handler *services.ReservationHandler) {
 	// can cancel only if the reservation is not started yet and it's owned by the user
 	r.Get(
 		"/cancel/:id",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		handler.CancelReservation(),
 	)
 }

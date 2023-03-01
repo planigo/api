@@ -13,14 +13,14 @@ func AuthRoutes(app fiber.Router, handler *services.AuthHandler) {
 
 	router.Get(
 		"/me",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin"}),
 		handler.Me(),
 	)
 
 	router.Get(
 		"/logout",
-		middlewares.IsLoggedIn(handler.Session),
+		middlewares.IsLoggedIn,
 		handler.Logout(),
 	)
 
