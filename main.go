@@ -1,7 +1,7 @@
 package main
 
 import (
-	"planigo/api"
+	api "planigo/pkg/server"
 )
 
 func main() {

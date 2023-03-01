@@ -3,7 +3,7 @@ package tests
 import (
 	"fmt"
 	"planigo/common"
-	"planigo/pkg/entities"
+	"planigo/internal/entities"
 	"planigo/utils"
 	"testing"
 	"time"

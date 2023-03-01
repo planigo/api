@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"planigo/common"
-	"planigo/pkg/entities"
+	"planigo/internal/entities"
 	"time"
 )
 
@@ -44,7 +44,7 @@ func GetNextDaysDate(x int) []time.Time {
 	return dates
 }
 
-// In the database, sunday is the last day of the week (7)
+// GetDayNumberWithSundayAsLast In the database, sunday is the last day of the week (7)
 // In go, sunday is the first day of the week (0)
 func GetDayNumberWithSundayAsLast(day int) int {
 	if day == 0 {
