@@ -31,3 +31,14 @@ type BookedReservation struct {
 	Price         float32 `json:"price"`
 	Start         string `json:"start"`
 }
+
+type AdminDetailedReservation struct {
+	ReservationId string  `json:"reservationId"`
+	Start         string  `json:"start"`
+	Firstname     string  `json:"firstname"`
+	Lastname      string  `json:"lastname"`
+	ServiceName   string  `json:"serviceName"`
+	Duration      int32   `json:"duration"`
+	Price         float32 `json:"price"`
+	IsCancelled	  bool    `json:"isCancelled"`
+}

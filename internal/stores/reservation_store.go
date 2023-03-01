@@ -126,7 +126,7 @@ func (r ReservationStore) CancelReservation(id string) error {
 
 func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.BookedReservation, error) {
 	var reservationBooked []common.BookedReservation
-	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id  = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
+	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
 	rows, err := r.Query(query, userId)
 	if err != nil {
 		return nil, err
@@ -151,4 +151,35 @@ func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.Booked
 	}
 
 	return reservationBooked, nil
+}
+
+func (r ReservationStore) FindSlotsBookedFilteredShopId(shopId string) ([]common.AdminDetailedReservation, error) {
+	var reservations []common.AdminDetailedReservation
+	query := "SELECT r.id, u.firstname, u.lastname, r.`start`, s.name, s.price, s.duration, r.is_cancelled FROM Reservation r JOIN `User` u ON u.id = r.user_id  JOIN Service s on s.id = r.service_id WHERE s.shop_id = ?"
+	rows, err := r.Query(query, shopId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var reservation common.AdminDetailedReservation
+		err := rows.
+			Scan(
+				&reservation.ReservationId,
+				&reservation.Firstname,
+				&reservation.Lastname,
+				&reservation.Start,
+				&reservation.ServiceName,
+				&reservation.Price,
+				&reservation.Duration,
+				&reservation.IsCancelled,
+			)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+		reservations = append(reservations, reservation)
+	}
+
+	return reservations, nil
 }
