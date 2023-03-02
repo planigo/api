@@ -2,11 +2,12 @@ package services
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"log"
 	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type ShopHandler struct {
@@ -50,14 +51,8 @@ func (h ShopHandler) GetShopsByUserId() fiber.Handler {
 	}
 }
 
-
 func (h ShopHandler) CreateShop() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		userRole := c.Locals("userRole")
-
-		if userRole != "admin" {
-			return presenter.Error(c, fiber.StatusForbidden, errors.New(presenter.ActionNotAllowed))
-		}
 		newShop := new(entities.ShopRequest)
 		if err := c.BodyParser(newShop); err != nil {
 			return err
