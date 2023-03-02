@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"net/http"
+	"planigo/core/presenter"
 	"planigo/pkg/store"
 )
 
@@ -14,12 +14,9 @@ func (h CategoryHandler) GetCategories() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		categories, err := h.CategoryStore.GetCategories()
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
-		return c.JSON(categories)
+		return presenter.Response(c, fiber.StatusOK, categories)
 	}
 }
