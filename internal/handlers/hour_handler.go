@@ -10,7 +10,7 @@ func HourRoutes(app fiber.Router, handler *services.HourHandler) {
 	hourRoutes := app.Group("/hours")
 
 	hourRoutes.Get("/", handler.GetHours())
-	hourRoutes.Get("/:shopId", handler.GetHoursByShopId())
+	hourRoutes.Get("/shop/:shopId", handler.GetHoursByShopId())
 	hourRoutes.Post(
 		"/",
 		middlewares.IsLoggedIn,
