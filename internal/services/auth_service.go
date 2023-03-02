@@ -9,6 +9,7 @@ import (
 	"planigo/internal/entities"
 	"planigo/pkg/mail"
 	"planigo/pkg/store"
+	"planigo/utils"
 )
 
 type AuthHandler struct {
@@ -33,12 +34,12 @@ func (r AuthHandler) Login() fiber.Handler {
 			return presenter.Error(ctx, fiber.StatusBadRequest, errors.New(presenter.WrongCredential))
 		}
 
-		if isSamePassword := CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
+		if isSamePassword := utils.CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
 			return presenter.Error(ctx, fiber.StatusBadRequest, errors.New(presenter.WrongCredential))
 		}
 
 		return presenter.Response(ctx, fiber.StatusOK, &fiber.Map{
-			"access_token": auth.GenerateJWT(&auth.TokenPayload{ID: findedUser.Id, Role: findedUser.Role}),
+			"access_token": auth.GenerateJWT(&auth.TokenPayload{Id: findedUser.Id, Role: findedUser.Role}),
 		})
 	}
 }
