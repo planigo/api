@@ -11,7 +11,7 @@ import (
 
 // TokenPayload defines the payload for the token
 type TokenPayload struct {
-	ID   string
+	Id   string
 	Role string
 }
 
@@ -23,7 +23,7 @@ func GenerateJWT(payload *TokenPayload) string {
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":  time.Now().Add(v).Unix(),
-		"ID":   payload.ID,
+		"Id":   payload.Id,
 		"Role": payload.Role,
 	})
 
@@ -57,7 +57,7 @@ func VerifyJWT(token string) (*TokenPayload, error) {
 		println("Error: parsed.Claims.(jwt.MapClaims) ", err.Error(), "\n")
 		return nil, err
 	}
-	id, ok := claims["ID"].(string)
+	id, ok := claims["Id"].(string)
 	if !ok {
 		return nil, errors.New("something went wrong")
 	}
@@ -65,10 +65,6 @@ func VerifyJWT(token string) (*TokenPayload, error) {
 	if !ok {
 		return nil, errors.New("something went wrong")
 	}
-	fmt.Println("role: ", role)
 
-	return &TokenPayload{
-		ID:   id,
-		Role: role,
-	}, nil
+	return &TokenPayload{Id: id, Role: role}, nil
 }

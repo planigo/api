@@ -1,12 +1,15 @@
 package services
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"planigo/core/auth"
+	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/mail"
 	"planigo/pkg/store"
+	"planigo/utils"
 )
 
 type AuthHandler struct {
@@ -23,29 +26,20 @@ func (r AuthHandler) Login() fiber.Handler {
 		}
 
 		if user.Email == "" || user.Password == "" {
-			return ctx.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "Wrong email or password!",
-			})
+			return presenter.Error(ctx, fiber.StatusBadRequest, errors.New(presenter.WrongCredential))
 		}
 
 		findedUser, err := r.UserStore.FindUserByEmail(user.Email)
 		if err != nil {
-			return ctx.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "Wrong email or password!",
-			})
+			return presenter.Error(ctx, fiber.StatusBadRequest, errors.New(presenter.WrongCredential))
 		}
 
-		if isSamePassword := CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
-			return ctx.Status(fiber.StatusBadRequest).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "Wrong email or password!",
-			})
+		if isSamePassword := utils.CheckPasswordHash(user.Password, findedUser.Password); !isSamePassword {
+			return presenter.Error(ctx, fiber.StatusBadRequest, errors.New(presenter.WrongCredential))
 		}
 
-		return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
-			"access_token": auth.GenerateJWT(&auth.TokenPayload{ID: findedUser.Id, Role: findedUser.Role}),
+		return presenter.Response(ctx, fiber.StatusOK, &fiber.Map{
+			"access_token": auth.GenerateJWT(&auth.TokenPayload{Id: findedUser.Id, Role: findedUser.Role}),
 		})
 	}
 }
@@ -55,10 +49,10 @@ func (r AuthHandler) Me() fiber.Handler {
 		id := ctx.Locals("userId").(string)
 		userById, err := r.UserStore.FindUserById(id)
 		if err != nil {
-			return err
+			return presenter.Error(ctx, fiber.StatusInternalServerError, err)
 		}
 
-		return ctx.Status(http.StatusOK).JSON(userById)
+		return presenter.Response(ctx, fiber.StatusOK, userById)
 	}
 }
 
@@ -72,11 +66,8 @@ func (r AuthHandler) ValidateEmail() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := c.Params("token")
 		if err := r.UserStore.ValidateUserEmail(token); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"statusCode": http.StatusInternalServerError,
-				"message":    "Something went wrong.",
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
-		return c.SendStatus(http.StatusOK)
+		return presenter.Response(c, fiber.StatusOK, "")
 	}
 }

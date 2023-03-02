@@ -2,13 +2,13 @@ package services
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"planigo/core/auth"
+	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/mail"
 	"planigo/pkg/store"
+	"planigo/utils"
 )
 
 type UserHandler struct {
@@ -17,30 +17,27 @@ type UserHandler struct {
 }
 
 func (r UserHandler) FindUsers() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
 		users, err := r.UserStore.FindUsers()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		return ctx.Status(http.StatusCreated).JSON(users)
+		return presenter.Response(c, fiber.StatusOK, users)
 	}
 }
 
 func (r UserHandler) RegisterUser() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
 
-		userPayload := ParseUserBody(ctx)
+		userPayload := ParseUserBody(c)
 
-		password := HashPassword(userPayload.Password)
+		password := utils.HashPassword(userPayload.Password)
 		userPayload.Password = password
 
 		uuid, err := r.CreateUser(*userPayload)
 		if err != nil {
-			return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": err.Error(),
-			})
+			return presenter.Error(c, fiber.StatusInternalServerError, err)
 		}
 
 		userPayload.Id = uuid
@@ -49,35 +46,22 @@ func (r UserHandler) RegisterUser() fiber.Handler {
 			return err
 		}
 
-		return ctx.SendStatus(http.StatusCreated)
+		return presenter.Response(c, fiber.StatusCreated, userPayload)
 	}
 }
 
-func HashPassword(password string) string {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(bytes)
-}
-
-func ParseUserBody(ctx *fiber.Ctx) *entities.User {
+func ParseUserBody(c *fiber.Ctx) *entities.User {
 	userPayload := new(entities.User)
 
-	if err := ctx.BodyParser(&userPayload); err != nil {
+	if err := c.BodyParser(&userPayload); err != nil {
 		log.Fatal(err)
 	}
 
 	return userPayload
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
 func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
-	validationToken := auth.GenerateJWT(&auth.TokenPayload{ID: user.Id, Role: user.Role})
+	validationToken := auth.GenerateJWT(&auth.TokenPayload{Id: user.Id, Role: user.Role})
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",

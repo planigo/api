@@ -2,8 +2,8 @@ package stores
 
 import (
 	"database/sql"
+	"github.com/gofiber/fiber/v2"
 	"log"
-	"net/http"
 	"planigo/internal/entities"
 )
 
@@ -119,10 +119,9 @@ func (store *ServiceStore) UpdateService(serviceId string, editedService entitie
 
 func (store *ServiceStore) RemoveService(serviceId string) (int, error) {
 	_, err := store.Exec("DELETE FROM Service WHERE id = ?;", serviceId)
-
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return fiber.StatusInternalServerError, err
 	}
 
-	return http.StatusNoContent, nil
+	return fiber.StatusNoContent, nil
 }

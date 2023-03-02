@@ -94,7 +94,7 @@ func (store *UserStore) ValidateUserEmail(token string) error {
 
 	user := &entities.User{}
 	query := "SELECT id FROM User WHERE id = ? AND is_email_verified = 0"
-	err = store.QueryRow(query, payload.ID).Scan(&user.Id)
+	err = store.QueryRow(query, payload.Id).Scan(&user.Id)
 	if err != nil {
 		println("Error: QueryRow ", err, "\n")
 		return err
