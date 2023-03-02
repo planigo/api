@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"log"
 	"planigo/core/presenter"
 	"planigo/internal/entities"
@@ -53,7 +52,7 @@ func (h ShopHandler) GetShopsByUserId() fiber.Handler {
 }
 
 func (h ShopHandler) CreateShop() fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
 		newShop := new(entities.ShopRequest)
 		if err := c.BodyParser(newShop); err != nil {
 			return err
