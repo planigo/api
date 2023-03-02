@@ -2,8 +2,10 @@ package stores
 
 import (
 	"database/sql"
+	"errors"
 	"planigo/core/auth"
 	"planigo/internal/entities"
+	"strings"
 )
 
 type UserStore struct {
@@ -46,6 +48,9 @@ func (store *UserStore) CreateUser(user entities.User) (string, error) {
 	if err := store.
 		QueryRow(query, user.Email, user.Firstname, user.Lastname, user.Role, user.Password).
 		Scan(&insertedUser.Id, &insertedUser.Email); err != nil {
+		if strings.HasPrefix(err.Error(), "Error 1062") {
+			return "", errors.New("email already exists")
+		}
 		return "", err
 	}
 
