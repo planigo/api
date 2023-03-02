@@ -2,13 +2,13 @@ package services
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"planigo/core/auth"
 	"planigo/core/presenter"
 	"planigo/internal/entities"
 	"planigo/pkg/mail"
 	"planigo/pkg/store"
+	"planigo/utils"
 )
 
 type UserHandler struct {
@@ -32,7 +32,7 @@ func (r UserHandler) RegisterUser() fiber.Handler {
 
 		userPayload := ParseUserBody(c)
 
-		password := HashPassword(userPayload.Password)
+		password := utils.HashPassword(userPayload.Password)
 		userPayload.Password = password
 
 		uuid, err := r.CreateUser(*userPayload)
@@ -50,14 +50,6 @@ func (r UserHandler) RegisterUser() fiber.Handler {
 	}
 }
 
-func HashPassword(password string) string {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(bytes)
-}
-
 func ParseUserBody(c *fiber.Ctx) *entities.User {
 	userPayload := new(entities.User)
 
@@ -68,13 +60,8 @@ func ParseUserBody(c *fiber.Ctx) *entities.User {
 	return userPayload
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
 func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
-	validationToken := auth.GenerateJWT(&auth.TokenPayload{ID: user.Id, Role: user.Role})
+	validationToken := auth.GenerateJWT(&auth.TokenPayload{Id: user.Id, Role: user.Role})
 	emailContent := mail.Content{
 		To:      user.Email,
 		Subject: "Bienvenue sur Planigo",

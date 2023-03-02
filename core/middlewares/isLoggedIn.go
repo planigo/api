@@ -25,7 +25,7 @@ func IsLoggedIn(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 
-	c.Locals("userId", payload.ID)
+	c.Locals("userId", payload.Id)
 	c.Locals("userRole", payload.Role)
 
 	return c.Next()
