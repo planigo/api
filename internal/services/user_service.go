@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"log"
 	"os"
@@ -78,19 +77,18 @@ func (r UserHandler) RegisterCustomer() fiber.Handler {
 			Role:      enums.Customer,
 		}
 
-		password := utils.HashPassword(userPayload.Password)
+		password := utils.HashPassword(registerCustomerBody.Password)
 		userPayload.Password = password
 
 		uuid, err := r.CreateUser(*userPayload)
 		if err != nil {
-			return presenter.Error(c, fiber.StatusInternalServerError, err)
+			return presenter.Error(c, fiber.StatusConflict, err)
 		}
 
 		userPayload.Id = uuid
-
-		if err := sendValidationEmail(r.Mailer, userPayload); err != nil {
-			fmt.Println("Error while sending email: ", err.Error())
-		}
+		//if err := sendValidationEmail(r.Mailer, userPayload); err != nil {
+		//	fmt.Println("Error while sending email: ", err.Error())
+		//}
 
 		return presenter.Response(c, fiber.StatusCreated, userPayload)
 	}

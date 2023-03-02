@@ -14,6 +14,7 @@ const (
 	CannotAddShop                 = "vous ne pouvez pas ajouter ce magasin"
 	CannotRemoveService           = "vous ne pouvez pas supprimer ce service"
 	PasswordsNotMatch             = "les mots de passe ne correspondent pas"
+	EmailAlreadyExist             = "cette email est déjà utilisée"
 )
 
 func Error(

@@ -59,7 +59,6 @@ func (sh ServiceHandler) CreateService() fiber.Handler {
 
 		if err != nil || (shop.OwnerID != userId && userRole != "admin") {
 			return presenter.Error(ctx, fiber.StatusInternalServerError, errors.New(presenter.ActionNotAllowed))
-
 		}
 
 		if err := ctx.BodyParser(newService); err != nil {
