@@ -35,7 +35,6 @@ func (m *Mailer) Send(content Content) error {
 	resp, id, err := m.mailgun.Send(ctx, msg)
 
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 

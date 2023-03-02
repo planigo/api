@@ -24,12 +24,13 @@ type DetailedReservation struct {
 }
 
 type BookedReservation struct {
-	ReservationId string `json:"reservationId"`
-	ShopName      string `json:"shopName"`
-	ServiceName   string `json:"serviceName"`
-	Duration      int32 `json:"duration"`
+	ReservationId string  `json:"reservationId"`
+	ShopName      string  `json:"shopName"`
+	ServiceName   string  `json:"serviceName"`
+	Duration      int32   `json:"duration"`
 	Price         float32 `json:"price"`
-	Start         string `json:"start"`
+	Start         string  `json:"start"`
+	IsCancelled   bool    `json:"isCancelled"`
 }
 
 type AdminDetailedReservation struct {
@@ -40,5 +41,5 @@ type AdminDetailedReservation struct {
 	ServiceName   string  `json:"serviceName"`
 	Duration      int32   `json:"duration"`
 	Price         float32 `json:"price"`
-	IsCancelled	  bool    `json:"isCancelled"`
+	IsCancelled   bool    `json:"isCancelled"`
 }

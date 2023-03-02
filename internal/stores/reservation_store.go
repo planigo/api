@@ -126,7 +126,7 @@ func (r ReservationStore) CancelReservation(id string) error {
 
 func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.BookedReservation, error) {
 	var reservationBooked []common.BookedReservation
-	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
+	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start, r.is_cancelled FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
 	rows, err := r.Query(query, userId)
 	if err != nil {
 		return nil, err
@@ -142,6 +142,7 @@ func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.Booked
 				&reservation.Price,
 				&reservation.Duration,
 				&reservation.Start,
+				&reservation.IsCancelled,
 			)
 		if err != nil {
 			fmt.Println(err.Error())
