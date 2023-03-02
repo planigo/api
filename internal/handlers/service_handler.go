@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"planigo/core/enums"
 
 	"planigo/core/middlewares"
 	"planigo/internal/services"
@@ -17,18 +18,18 @@ func ServicesRoutes(app fiber.Router, handler *services.ServiceHandler) {
 	router.Post(
 		"/",
 		middlewares.IsLoggedIn,
-		middlewares.RequireRoles([]string{"admin", "owner"}),
+		middlewares.RequireRoles([]string{enums.Admin, enums.Owner}),
 		handler.CreateService(),
 	)
 
 	router.Patch("/:serviceId",
 		middlewares.IsLoggedIn,
-		middlewares.RequireRoles([]string{"admin", "owner"}),
+		middlewares.RequireRoles([]string{enums.Admin, enums.Owner}),
 		handler.EditService(),
 	)
 	router.Delete("/:serviceId",
 		middlewares.IsLoggedIn,
-		middlewares.RequireRoles([]string{"admin", "owner"}),
+		middlewares.RequireRoles([]string{enums.Admin, enums.Owner}),
 		handler.DeleteService(),
 	)
 }

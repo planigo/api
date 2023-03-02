@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"planigo/core/enums"
 	"planigo/core/middlewares"
 	"planigo/internal/services"
 
@@ -12,7 +13,7 @@ func ReservationRoutes(app fiber.Router, handler *services.ReservationHandler) {
 
 	r.Get("slots/shop/:shopId",
 		middlewares.IsLoggedIn,
-		middlewares.RequireRoles([]string{"admin"}),
+		middlewares.RequireRoles([]string{enums.Admin}),
 		handler.GetSlotsBookedByShop(),
 	)
 
