@@ -13,6 +13,7 @@ const (
 	ActionNotAllowed              = "vous n'êtes pas autorisé à effectuer cette action"
 	CannotAddShop                 = "vous ne pouvez pas ajouter ce magasin"
 	CannotRemoveService           = "vous ne pouvez pas supprimer ce service"
+	PasswordsNotMatch             = "les mots de passe ne correspondent pas"
 )
 
 func Error(

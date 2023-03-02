@@ -16,4 +16,5 @@ func UserRoutes(app fiber.Router, handler *services.UserHandler) {
 	)
 
 	router.Post("/", handler.RegisterUser())
+	router.Post("/customer", handler.RegisterCustomer())
 }
