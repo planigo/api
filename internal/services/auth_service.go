@@ -40,6 +40,14 @@ func (r AuthHandler) Login() fiber.Handler {
 
 		return presenter.Response(ctx, fiber.StatusOK, &fiber.Map{
 			"access_token": auth.GenerateJWT(&auth.TokenPayload{Id: findedUser.Id, Role: findedUser.Role}),
+			"user": &fiber.Map{
+				"id":              findedUser.Id,
+				"firstname":       findedUser.Firstname,
+				"lastname":        findedUser.Lastname,
+				"email":           findedUser.Email,
+				"role":            findedUser.Role,
+				"isEmailVerified": findedUser.IsEmailVerified,
+			},
 		})
 	}
 }

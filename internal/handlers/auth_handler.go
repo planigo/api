@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"planigo/core/enums"
 	"planigo/core/middlewares"
 	"planigo/internal/services"
 )
@@ -15,7 +14,6 @@ func AuthRoutes(app fiber.Router, handler *services.AuthHandler) {
 	router.Get(
 		"/me",
 		middlewares.IsLoggedIn,
-		middlewares.RequireRoles([]string{enums.Admin}),
 		handler.Me(),
 	)
 
