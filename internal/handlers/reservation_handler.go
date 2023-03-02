@@ -10,7 +10,7 @@ import (
 func ReservationRoutes(app fiber.Router, handler *services.ReservationHandler) {
 	r := app.Group("/reservation")
 
-	r.Get("shop/:shopId",
+	r.Get("slots/shop/:shopId",
 		middlewares.IsLoggedIn,
 		middlewares.RequireRoles([]string{"admin"}),
 		handler.GetSlotsBookedByShop(),

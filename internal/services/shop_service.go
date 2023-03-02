@@ -1,10 +1,11 @@
 package services
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"log"
 	"planigo/internal/entities"
 	"planigo/pkg/store"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type ShopHandler struct {
@@ -48,17 +49,8 @@ func (h ShopHandler) GetShopsByUserId() fiber.Handler {
 	}
 }
 
-
 func (h ShopHandler) CreateShop() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		userRole := ctx.Locals("userRole")
-
-		if userRole != "admin" {
-			return ctx.Status(401).JSON(&fiber.Map{
-				"status":  "fail",
-				"message": "You are not authorized to create this resource",
-			})
-		}
 		newShop := new(entities.ShopRequest)
 		if err := ctx.BodyParser(newShop); err != nil {
 			return err
