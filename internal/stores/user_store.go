@@ -2,11 +2,8 @@ package stores
 
 import (
 	"database/sql"
-	"errors"
 	"planigo/core/auth"
-	"planigo/core/presenter"
 	"planigo/internal/entities"
-	"strings"
 )
 
 type UserStore struct {
@@ -42,20 +39,18 @@ func (store *UserStore) FindUsers() ([]entities.User, error) {
 }
 
 func (store *UserStore) CreateUser(user entities.User) (string, error) {
-	insertedUser := &entities.User{}
+	query := "INSERT INTO User (email, firstname, lastname, role, password) VALUES (?, ?, ?, ?, ?);"
 
-	query := "INSERT INTO User (email, firstname, lastname, role, password) VALUES (?, ?, ?, ?, ?) RETURNING id, email"
-
-	if err := store.
-		QueryRow(query, user.Email, user.Firstname, user.Lastname, user.Role, user.Password).
-		Scan(&insertedUser.Id, &insertedUser.Email); err != nil {
-		if strings.HasPrefix(err.Error(), "Error 1062") {
-			return "", errors.New(presenter.EmailAlreadyExist)
-		}
+	_, err := store.Query(query, user.Email, user.Firstname, user.Lastname, user.Role, user.Password)
+	if err != nil {
 		return "", err
 	}
 
-	return insertedUser.Id, nil
+	newUser, err := store.FindUserByEmail(user.Email)
+	if err != nil {
+		return "", err
+	}
+	return newUser.Id, nil
 }
 
 func (store *UserStore) FindUserByEmail(email string) (entities.User, error) {

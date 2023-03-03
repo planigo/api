@@ -4,8 +4,6 @@ import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
 	"log"
-	"os"
-	"planigo/core/auth"
 	"planigo/core/enums"
 	"planigo/core/presenter"
 	"planigo/internal/entities"
@@ -45,9 +43,9 @@ func (r UserHandler) RegisterUser() fiber.Handler {
 
 		userPayload.Id = uuid
 
-		if err := sendValidationEmail(r.Mailer, userPayload); err != nil {
-			return err
-		}
+		//if err := sendValidationEmail(r.Mailer, userPayload); err != nil {
+		//	return err
+		//}
 
 		return presenter.Response(c, fiber.StatusCreated, userPayload)
 	}
@@ -104,17 +102,17 @@ func ParseUserBody(c *fiber.Ctx) *entities.User {
 	return userPayload
 }
 
-func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
-	validationToken := auth.GenerateJWT(&auth.TokenPayload{Id: user.Id, Role: user.Role})
-	validateUrl := os.Getenv("FRONTEND_URL") + "/validate/" + validationToken
-	emailContent := mail.Content{
-		To:      user.Email,
-		Subject: "Bienvenue sur Planigo",
-		Body:    "Bienvenue sur Planigo, votre application de prise de reservation en ligne. Merci de cliquer sur le lien suivant pour valider votre compte : " + validateUrl,
-	}
-
-	if err := mailer.Send(emailContent); err != nil {
-		return err
-	}
-	return nil
-}
+//func sendValidationEmail(mailer *mail.Mailer, user *entities.User) error {
+//	validationToken := auth.GenerateJWT(&auth.TokenPayload{Id: user.Id, Role: user.Role})
+//	validateUrl := os.Getenv("FRONTEND_URL") + "/validate/" + validationToken
+//	emailContent := mail.Content{
+//		To:      user.Email,
+//		Subject: "Bienvenue sur Planigo",
+//		Body:    "Bienvenue sur Planigo, votre application de prise de reservation en ligne. Merci de cliquer sur le lien suivant pour valider votre compte : " + validateUrl,
+//	}
+//
+//	if err := mailer.Send(emailContent); err != nil {
+//		return err
+//	}
+//	return nil
+//}

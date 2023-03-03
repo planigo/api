@@ -23,7 +23,7 @@ func NewReservationStore(db *sql.DB) *ReservationStore {
 func (r ReservationStore) GetReservationsByShopId(id string) ([]common.DetailedReservation, error) {
 	var reservationList []common.DetailedReservation
 
-	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.service_id = s.id AND s.shop_id = ?;"
+	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.service_id = s.id AND s.shop_id = ? AND is_cancelled = FALSE;"
 	rows, err := r.Query(query, id)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -58,10 +58,11 @@ func (r ReservationStore) GetReservationsByShopId(id string) ([]common.DetailedR
 
 func (r ReservationStore) InsertReservation(serviceId string, start string, userId string) (string, error) {
 	var reservation entities.Reservation
-	query := "INSERT INTO Reservation (service_id, user_id, start) VALUES (?, ?, ?) RETURNING id;"
-	err := r.QueryRow(query, serviceId, userId, start).Scan(&reservation.Id)
-	if err != nil {
-		fmt.Println(err.Error())
+	query := "INSERT INTO Reservation (service_id, user_id, start) VALUES (?, ?, ?)"
+	r.QueryRow(query, serviceId, userId, start)
+
+	q := "SELECT id FROM Reservation WHERE id = LAST_INSERT_ID()"
+	if err := r.QueryRow(q).Scan(&reservation.Id); err != nil {
 		return "", err
 	}
 
@@ -70,7 +71,7 @@ func (r ReservationStore) InsertReservation(serviceId string, start string, user
 
 func (r ReservationStore) GetReservationById(id string) (common.DetailedReservation, error) {
 	var reservation common.DetailedReservation
-	query := "SELECT r.id, s.id, r.user_id, s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.id = ?;"
+	query := "SELECT r.id, s.id, r.user_id, s.name, s.duration, r.start FROM Reservation r, Service s WHERE r.id = ? AND is_cancelled = false;"
 	err := r.
 		QueryRow(query, id).
 		Scan(
@@ -96,7 +97,7 @@ func (r ReservationStore) BookReservation(
 	userId string,
 ) (common.DetailedReservation, error) {
 	serviceReservation := common.DetailedReservation{}
-	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ? AND r.is_cancelled = FALSE;"
+	query := "SELECT r.id, s.id , s.name, s.duration, r.start FROM Reservation r, Service s WHERE s.shop_id = ? AND r.start = ? AND r.is_cancelled = false;"
 	rows, err := r.Query(query, shopId, start)
 	if rows.Next() {
 		return serviceReservation, errors.New("The slot is no longer available")
@@ -126,7 +127,7 @@ func (r ReservationStore) CancelReservation(id string) error {
 
 func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.BookedReservation, error) {
 	var reservationBooked []common.BookedReservation
-	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start, r.is_cancelled FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id = s.shop_id WHERE r.user_id = ? ORDER BY r.`start` ASC"
+	query := "SELECT r.id, sh.name, s.name, s.price, s.duration, r.start, r.is_cancelled FROM Reservation r JOIN Service s on s.id = r.service_id JOIN Shop sh on sh.id = s.shop_id WHERE r.user_id = ? AND r.is_cancelled = false ORDER BY r.`start` ASC"
 	rows, err := r.Query(query, userId)
 	if err != nil {
 		return nil, err
@@ -156,7 +157,7 @@ func (r ReservationStore) GetSlotsBookedByUserId(userId string) ([]common.Booked
 
 func (r ReservationStore) FindSlotsBookedFilteredShopId(shopId string) ([]common.AdminDetailedReservation, error) {
 	var reservations []common.AdminDetailedReservation
-	query := "SELECT r.id, u.firstname, u.lastname, r.`start`, s.name, s.price, s.duration, r.is_cancelled FROM Reservation r JOIN `User` u ON u.id = r.user_id  JOIN Service s on s.id = r.service_id WHERE s.shop_id = ?"
+	query := "SELECT r.id, u.firstname, u.lastname, r.`start`, s.name, s.price, s.duration, r.is_cancelled FROM Reservation r JOIN `User` u ON u.id = r.user_id  JOIN Service s on s.id = r.service_id WHERE s.shop_id = ? AND r.is_cancelled = false"
 	rows, err := r.Query(query, shopId)
 	if err != nil {
 		return nil, err

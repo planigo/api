@@ -147,11 +147,11 @@ VALUES (
 
 -- Reservations
 INSERT INTO Reservation (start, service_id, user_id)
-VALUES ('11:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('12:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('13:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('11:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('10:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('11:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('15:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
-       ('17:00:00', (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1));
+VALUES (CAST('2023-03-03 15:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 09:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 10:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 11:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 13:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 12:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 16:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1)),
+       (CAST('2023-03-03 17:00:00' as datetime), (SELECT id FROM Service ORDER BY RAND() LIMIT 1), (SELECT id FROM User WHERE role = 'customer' LIMIT 1));
